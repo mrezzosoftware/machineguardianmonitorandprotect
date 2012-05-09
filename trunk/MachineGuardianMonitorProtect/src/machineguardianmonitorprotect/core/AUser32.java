@@ -15,7 +15,7 @@ public class AUser32 {
         short GetAsyncKeyState(int key);
 
         short GetKeyState(int key);
-
+        
         IntByReference GetKeyboardLayout(int dwLayout);
 
         int MapVirtualKeyExW(int uCode, int nMapType, IntByReference dwhkl);
