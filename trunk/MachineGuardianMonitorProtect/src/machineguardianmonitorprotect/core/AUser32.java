@@ -48,7 +48,7 @@ public class AUser32 {
 
 
         byte[] keystate = new byte[256];
-        //User32.INSTANCE.GetKeyboardState(keystate);
+        User32.INSTANCE.GetKeyboardState(keystate);
 
 
         IntByReference keyblayoutID = User32.INSTANCE.GetKeyboardLayout(0);
@@ -75,6 +75,7 @@ public class AUser32 {
                 break;
 
             default:
+                System.out.println("key: " + key);
                 System.out.println("output=" + String.valueOf(buff).substring(0, ret));
         }
 
