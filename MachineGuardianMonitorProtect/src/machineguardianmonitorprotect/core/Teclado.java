@@ -13,7 +13,6 @@ import org.sf.feeling.swt.win32.extension.hook.data.Keyboard_LLHookData;
 import org.sf.feeling.swt.win32.extension.hook.interceptor.InterceptorFlag;
 import org.sf.feeling.swt.win32.extension.hook.interceptor.Keyboard_LLHookInterceptor;
 import org.sf.feeling.swt.win32.extension.hook.listener.HookEventListener;
-import org.sf.feeling.swt.win32.extension.widgets.Shortcut;
 import org.sf.feeling.swt.win32.internal.extension.util.FlagSet;
 
 public class Teclado {

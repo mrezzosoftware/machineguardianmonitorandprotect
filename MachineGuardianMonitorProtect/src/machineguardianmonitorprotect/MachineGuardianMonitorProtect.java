@@ -1,7 +1,6 @@
 package machineguardianmonitorprotect;
 
-import machineguardianmonitorprotect.core.ActiveWindowInfo;
-import machineguardianmonitorprotect.core.KeyboardHook;
+import machineguardianmonitorprotect.core.windows.Windows;
 
 public class MachineGuardianMonitorProtect {
 
@@ -9,10 +8,7 @@ public class MachineGuardianMonitorProtect {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        ActiveWindowInfo janelaAtiva = new ActiveWindowInfo();
-        KeyboardHook kbh = new KeyboardHook();
-        kbh.registrarTeclas(true);
-        System.out.println("Título janela ativa: " + janelaAtiva.getTituloJanelaAtiva());
-        System.out.println("Nome executável da janela: " + janelaAtiva.getNomeExecutavelJanelaAtiva());
+        System.out.println("Título janela ativa: " + Windows.Processos.getTituloJanelaAtiva());
+        System.out.println("Nome executável da janela: " + Windows.Processos.getNomeProcessoJanelaAtiva());
     }
 }

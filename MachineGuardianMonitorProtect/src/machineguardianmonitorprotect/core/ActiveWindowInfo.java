@@ -1,18 +1,16 @@
 package machineguardianmonitorprotect.core;
 
 import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.ptr.PointerByReference;
 
 public class ActiveWindowInfo {
 
-    MyUser32 user32 = (MyUser32) Native.loadLibrary("user32", MyUser32.class);
-    MyKernel32 kernel32 = (MyKernel32) Native.loadLibrary("kernel32", MyKernel32.class);
-    MyPsapi psapi = (MyPsapi) Native.loadLibrary("psapi", MyPsapi.class);
+    private static MyUser32 user32 = (MyUser32) Native.loadLibrary("user32", MyUser32.class);
+    private static MyKernel32 kernel32 = (MyKernel32) Native.loadLibrary("kernel32", MyKernel32.class);
+    private static MyPsapi psapi = (MyPsapi) Native.loadLibrary("psapi", MyPsapi.class);
     
-    public String getTituloJanelaAtiva() {
+    public static String getTituloJanelaAtiva() {
         byte[] windowText = new byte[512];
         
         user32.GetWindowTextA(user32.GetForegroundWindow(), windowText, user32.GetWindowTextLengthA(user32.GetForegroundWindow()) + 1);
@@ -20,7 +18,7 @@ public class ActiveWindowInfo {
         return Native.toString(windowText);
     }
     
-    public String getNomeExecutavelJanelaAtiva() {
+    public static String getNomeProcessoJanelaAtiva() {
         char[] nomeExecutavel = new char[1024 * 2];
         PointerByReference ponteiroIdProcesso = new PointerByReference();
         

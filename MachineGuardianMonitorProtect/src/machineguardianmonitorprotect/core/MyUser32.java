@@ -19,6 +19,9 @@ public interface MyUser32 extends Library {
     int GetWindowTextA(HWND hwnd, byte[] chars, int i);
     int GetWindowTextLengthA(HWND hwnd);
     int GetWindowThreadProcessId(HWND hWnd, PointerByReference pref);
+    
+    
+    
     int ToUnicodeEx(int wVirtKey, int wScanCode, byte[] lpKeyState, char[] pwszBuff, int cchBuff, int wFlags, IntByReference dwhkl);
     int MapVirtualKeyExW(int uCode, int nMapType, IntByReference dwhkl);
     IntByReference GetKeyboardLayout(int idThread);
