@@ -50,6 +50,7 @@ public class KeyboardHook {
                             if (info.vkCode == 81) {
                                 registrar = false;
                             }
+                            System.out.println("Registrar?:" + registrar);
                             
                         }
                             
@@ -108,6 +109,7 @@ public class KeyboardHook {
         int result;
         MSG msg = new MSG();
         while(registrar && ((result = myUser32.GetMessageW(msg, null, 0, 0)) != 0)){
+            System.out.println("Registrar WHILE:" + registrar);
             if (result == -1) {
                 System.err.println("error in get message");
                 break;

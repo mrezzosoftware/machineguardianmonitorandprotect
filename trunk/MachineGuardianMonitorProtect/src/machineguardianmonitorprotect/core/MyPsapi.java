@@ -12,6 +12,6 @@ import com.sun.jna.win32.StdCallLibrary;
 public interface MyPsapi extends StdCallLibrary {
 
     int GetModuleBaseNameW(HANDLE handler, HMODULE hmodule, char[] lpBaseName, int size);
-    //int GetModuleBaseNameW(Pointer handler, HMODULE hmodule, char[] lpBaseName, int size);
+    
     int GetProcessImageFileNameA(HANDLE hProcess, char[] lpBaseName, int size);
 }
