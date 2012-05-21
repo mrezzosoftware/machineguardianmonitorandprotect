@@ -94,9 +94,6 @@ public class Windows {
         private KeyboardHookData keyboardHookData;
         //Keyboard_LLHookData keyboardLLHookData;
         private Caracter caracter = new Caracter();
-        private FlagSet hotKeysCombinacaoAtual = new FlagSet();
-        private FlagSet ctrlAltDel;
-        private FlagSet altTab;
         private String caracterEspecial = "";
         private StringBuffer palavra = new StringBuffer();
 
@@ -106,7 +103,7 @@ public class Windows {
 
         }
 
-        public void init() {
+        public void iniciarCapturaTeclas() {
 
             Keyboard_LLHookInterceptor kllhi = new Keyboard_LLHookInterceptor() {
 
@@ -120,7 +117,6 @@ public class Windows {
                     System.out.println(kllhd.getStruct().getDwExtraInfo());
 
                     if (!caracter.isCaracterEspecial(kllhd.vkCode()).equalsIgnoreCase("")) {
-                        hotKeysCombinacaoAtual.and(kllhd.vkCode());
 
                         //if (ctrlAltDel.contains(vkCode))
                     }
@@ -183,22 +179,6 @@ public class Windows {
 
                         if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
                             caracterEspecial = caracter.isCaracterEspecial(vkCode);
-
-                            if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
-                                hotKeys[0] = caracterEspecial;
-                                System.out.println("CTRL");
-                            } else if (hotKeys[0].equalsIgnoreCase("[CTRL]")
-                                    && caracterEspecial.equalsIgnoreCase("[ALT]")) {
-                                hotKeys[1] = caracterEspecial;
-                                System.out.println("ALT");
-                            } else if (hotKeys[0].equalsIgnoreCase("[CTRL]")
-                                    && hotKeys[1].equalsIgnoreCase("[ALT]")
-                                    && caracterEspecial.equalsIgnoreCase("[DELETE]")) {
-                                System.out.println("DELETE");
-                                hotKeys[2] = caracterEspecial;
-                                imprimirHotKeys(hotKeys);
-                                hotKeyImpressa = true;
-                            }
 
                             System.out.println(caracterEspecial);
 
@@ -274,7 +254,7 @@ public class Windows {
 
         }
 
-        public boolean isPressedShift(int key, boolean tcPressionada) {
+        private boolean isPressedShift(int key, boolean tcPressionada) {
 
             return (key == Win32.VK_SHIFT && tcPressionada);
 
@@ -315,14 +295,6 @@ public class Windows {
 
             caracterEspecial = "";
             totalRepeticoesTeclasEspeciaisPressionadas = 1;
-        }
-
-        private void imprimirHotKeys(String[] hk) {
-
-            for (int i = 0; i < hk.length; i++) {
-                System.out.println(hk[i]);
-                hk[i] = "";
-            }
         }
 
         public void lePalavra(char key) {
