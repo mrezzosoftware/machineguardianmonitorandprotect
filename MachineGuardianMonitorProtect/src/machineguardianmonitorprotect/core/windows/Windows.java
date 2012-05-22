@@ -4,6 +4,8 @@
  */
 package machineguardianmonitorprotect.core.windows;
 
+import com.melloware.jintellitype.HotkeyListener;
+import com.melloware.jintellitype.IntellitypeListener;
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.PointerByReference;
@@ -77,7 +79,7 @@ public class Windows {
 
 
 
-    public static class Teclado {
+    public static class Teclado implements HotkeyListener, IntellitypeListener{
 
         private boolean isTeclaPressionada = false;
         private boolean isTeclaMantidaPressionada = false;
@@ -96,12 +98,6 @@ public class Windows {
         private Caracter caracter = new Caracter();
         private String caracterEspecial = "";
         private StringBuffer palavra = new StringBuffer();
-
-        public Teclado() {
-            super();
-            //init();
-
-        }
 
         public void iniciarCapturaTeclas() {
 
@@ -151,25 +147,16 @@ public class Windows {
                 public void acceptHookData(HookData hookData) {
 
                     keyboardHookData = (KeyboardHookData) hookData;
+                    // Indica se a tecla foi pressionada (keyPressed = true) ou solta (keyReleased = false).
                     isTeclaPressionada = keyboardHookData.getTransitionState();
+                    // Indica se a tecla pressionada anteriormente continua mantida pressionada.
                     isTeclaMantidaPressionada = keyboardHookData.getPreviousState();
+                    // Obtém o Virtual Key Code da tecla pressionada.
                     vkCode = keyboardHookData.getWParam();
 
                     //System.out.println("tecla: " + vkCode);
                     //System.out.println("keyboardHookData.getPreviousState(): " + keyboardHookData.getPreviousState());
                     //System.out.println("keyboardHookData.getRepeatCount(): " + keyboardHookData.getRepeatCount());
-
-//                if (isTeclaMantidaPressionada) {
-//                    if (vkCode != ultimoVKCode  && !isTeclaPressionada) {
-//                        caracterEspecial = caracter.isCaracterEspecial(ultimoVKCode);
-//                        if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-//                            imprimeString(caracterEspecial);
-//                            imprimeString(caracter.isCaracterEspecial(vkCode));
-//                        }
-//                    } else {
-//                        vkCode = -1;
-//                    }
-//                }
 
                     if (isTeclaPressionada) {
 
@@ -328,6 +315,16 @@ public class Windows {
                 System.out.println("");
                 tamanhoLinhaAtual = 0;
             }
+        }
+
+        @Override
+        public void onHotKey(int i) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void onIntellitype(int i) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 }
