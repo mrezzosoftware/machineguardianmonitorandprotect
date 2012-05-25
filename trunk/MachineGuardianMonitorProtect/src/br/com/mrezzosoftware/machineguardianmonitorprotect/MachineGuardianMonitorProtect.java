@@ -8,7 +8,8 @@ public class MachineGuardianMonitorProtect {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.out.println("Título janela ativa: " + Windows.Processos.getTituloJanelaAtiva());
-        System.out.println("Nome executável da janela: " + Windows.Processos.getNomeProcessoJanelaAtiva());
+        Windows w = new Windows();
+        System.out.println("Título janela ativa: " + w.Processos.getTituloJanelaAtiva());
+        System.out.println("Nome executável da janela: " + w.Processos.getNomeProcessoJanelaAtiva());
     }
 }
