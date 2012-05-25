@@ -1,6 +1,6 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect;
 
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.windows.Windows;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.Windows;
 
 public class MachineGuardianMonitorProtect {
 
