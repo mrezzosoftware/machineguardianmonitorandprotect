@@ -1,9 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.mrezzosoftware.machineguardianmonitorprotect.windows;
 
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.Caracter;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyKernel32;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyPsapi;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyUser32;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.Teclas;
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.IntellitypeListener;
 import com.sun.jna.Native;
@@ -11,34 +12,33 @@ import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.PointerByReference;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.Caracter;
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyKernel32;
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyPsapi;
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyUser32;
 import org.sf.feeling.swt.win32.extension.Win32;
 import org.sf.feeling.swt.win32.extension.hook.Hook;
-import org.sf.feeling.swt.win32.extension.hook.Keyboard_LLHook;
 import org.sf.feeling.swt.win32.extension.hook.data.HookData;
 import org.sf.feeling.swt.win32.extension.hook.data.KeyboardHookData;
-import org.sf.feeling.swt.win32.extension.hook.data.Keyboard_LLHookData;
-import org.sf.feeling.swt.win32.extension.hook.interceptor.InterceptorFlag;
-import org.sf.feeling.swt.win32.extension.hook.interceptor.Keyboard_LLHookInterceptor;
 import org.sf.feeling.swt.win32.extension.hook.listener.HookEventListener;
-import org.sf.feeling.swt.win32.internal.extension.util.FlagSet;
 
 /**
  *
  * @author Marina
  */
 public class Windows {
+    
+    public final Processos Processos;
+    public final Teclado Teclado;
+    
+    public Windows() {
+        Processos = new Processos();
+        Teclado = new Teclado();
+    }
+    
+    public class Processos {
 
-    public static class Processos {
-
-        private static MyUser32 user32 = (MyUser32) Native.loadLibrary("user32", MyUser32.class);
-        private static MyKernel32 kernel32 = (MyKernel32) Native.loadLibrary("kernel32", MyKernel32.class);
-        private static MyPsapi psapi = (MyPsapi) Native.loadLibrary("psapi", MyPsapi.class);
+        private MyUser32 user32 = (MyUser32) Native.loadLibrary("user32", MyUser32.class);
+        private MyKernel32 kernel32 = (MyKernel32) Native.loadLibrary("kernel32", MyKernel32.class);
+        private MyPsapi psapi = (MyPsapi) Native.loadLibrary("psapi", MyPsapi.class);
+        
+        private Processos() {}
 
         /**
          * Retorna o nome do processo da janela que está ativa (em primeiro
@@ -46,7 +46,7 @@ public class Windows {
          *
          * @return String nome do processo da janela ativa
          */
-        public static String getNomeProcessoJanelaAtiva() {
+        public String getNomeProcessoJanelaAtiva() {
             char[] nomeExecutavel = new char[1024 * 2];
             PointerByReference ponteiroIdProcesso = new PointerByReference();
 
@@ -66,7 +66,7 @@ public class Windows {
          *
          * @return String título da janela ativa
          */
-        public static String getTituloJanelaAtiva() {
+        public String getTituloJanelaAtiva() {
             byte[] windowText = new byte[512];
 
             user32.GetWindowTextA(user32.GetForegroundWindow(), windowText, user32.GetWindowTextLengthA(user32.GetForegroundWindow()) + 1);
@@ -76,10 +76,7 @@ public class Windows {
     }
 
 
-
-
-
-    public static class Teclado implements HotkeyListener, IntellitypeListener{
+    public class Teclado implements HotkeyListener, IntellitypeListener{
 
         private boolean isTeclaPressionada = false;
         private boolean isTeclaMantidaPressionada = false;
@@ -98,49 +95,51 @@ public class Windows {
         private Caracter caracter = new Caracter();
         private String caracterEspecial = "";
         private StringBuffer palavra = new StringBuffer();
+        
+        private Teclado(){}
 
-        public void iniciarCapturaTeclas() {
+        public void capturarTeclasDigitadas() {
 
-            Keyboard_LLHookInterceptor kllhi = new Keyboard_LLHookInterceptor() {
-
-                @Override
-                public InterceptorFlag intercept(Keyboard_LLHookData kllhd) {
-                    System.out.println(kllhd.getExtraInfo());
-                    System.out.println(kllhd.getFlags());
-                    System.out.println(kllhd.getScanCode());
-                    System.out.println(kllhd.getTime());
-                    System.out.println(kllhd.vkCode());
-                    System.out.println(kllhd.getStruct().getDwExtraInfo());
-
-                    if (!caracter.isCaracterEspecial(kllhd.vkCode()).equalsIgnoreCase("")) {
-
-                        //if (ctrlAltDel.contains(vkCode))
-                    }
-
-
-                    return InterceptorFlag.TRUE;
-                }
-            };
-
-            Keyboard_LLHook.addHookInterceptor(kllhi);
-            if (Keyboard_LLHook.installHook()) {
-                System.out.println("INSTALADO");
-            }
-
-            new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    while (Keyboard_LLHook.isInstalled()) {
-                        System.out.println("INSTALADO");
-                        try {
-                            Thread.sleep(3000);
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(br.com.mrezzosoftware.machineguardianmonitorprotect.core.Teclado.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            }).start();
+//            Keyboard_LLHookInterceptor kllhi = new Keyboard_LLHookInterceptor() {
+//
+//                @Override
+//                public InterceptorFlag intercept(Keyboard_LLHookData kllhd) {
+//                    System.out.println(kllhd.getExtraInfo());
+//                    System.out.println(kllhd.getFlags());
+//                    System.out.println(kllhd.getScanCode());
+//                    System.out.println(kllhd.getTime());
+//                    System.out.println(kllhd.vkCode());
+//                    System.out.println(kllhd.getStruct().getDwExtraInfo());
+//
+//                    if (!caracter.isCaracterEspecial(kllhd.vkCode()).equalsIgnoreCase("")) {
+//
+//                        //if (ctrlAltDel.contains(vkCode))
+//                    }
+//
+//
+//                    return InterceptorFlag.TRUE;
+//                }
+//            };
+//
+//            Keyboard_LLHook.addHookInterceptor(kllhi);
+//            if (Keyboard_LLHook.installHook()) {
+//                System.out.println("INSTALADO");
+//            }
+//
+//            new Thread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+//                    while (Keyboard_LLHook.isInstalled()) {
+//                        System.out.println("INSTALADO");
+//                        try {
+//                            Thread.sleep(3000);
+//                        } catch (InterruptedException ex) {
+//                            Logger.getLogger(br.com.mrezzosoftware.machineguardianmonitorprotect.core.Teclado.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//                    }
+//                }
+//            }).start();
 
             Hook.KEYBOARD.addListener(this, new HookEventListener() {
 
@@ -326,5 +325,10 @@ public class Windows {
         public void onIntellitype(int i) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        
     }
+
+
+
 }
