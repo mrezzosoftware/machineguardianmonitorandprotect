@@ -9,6 +9,8 @@ import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.PointerByReference;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.sf.feeling.swt.win32.extension.Win32;
 import org.sf.feeling.swt.win32.extension.hook.Hook;
 import org.sf.feeling.swt.win32.extension.hook.data.HookData;
@@ -78,11 +80,14 @@ public class Windows {
         private boolean isTeclaPressionada = false;
         private boolean isTeclaMantidaPressionada = false;
         private boolean shiftPressionado = false;
+        private boolean ctrlPressionado = false;
+        private boolean altPressionado = false;
         private boolean isCapslockAtivado = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+        private boolean rodando = false;
         private char acento;
         private char teclaDigitada;
         private int quantidadeTeclasHotKeyImpressa = 0;
-        private int totalTeclasHotKey = 0;
+        private int controlaTeclaImpressa = 0;
         private int vkCode, scanCode;
         private int totalRepeticoesTeclasEspeciaisPressionadas = 1;
         private int totalRepeticoesTeclasNormaisPressionadas = 0;
@@ -105,6 +110,8 @@ public class Windows {
                 @Override
                 public void acceptHookData(HookData hookData) {
 
+                    controlaTeclaImpressa = 1;
+
                     if (quantidadeTeclasHotKeyImpressa == 0) {
 
                         keyboardHookData = (KeyboardHookData) hookData;
@@ -117,26 +124,10 @@ public class Windows {
 
                         if (isTeclaPressionada) {
 
-                            if (isPressedShift(vkCode, isTeclaPressionada)) {
+                            if (isPressedShift(vkCode)) {
                                 shiftPressionado = true;
                             }
 
-                            if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-                                caracterEspecial += caracter.isCaracterEspecial(vkCode);
-                            }
-
-                            if (isTeclaMantidaPressionada) {
-                                if (caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-                                    totalRepeticoesTeclasNormaisPressionadas++;
-                                } else {
-                                    totalRepeticoesTeclasEspeciaisPressionadas++;
-                                    if (!caracterEspecial.equalsIgnoreCase("")) {
-                                        totalTeclasHotKey++;
-                                    }
-                                }
-                            }
-
-                        } else if (!isTeclaPressionada) {
                             if (!caracter.isAcento(vkCode)) {
 
                                 teclaDigitada = caracter.converteASCIItoCHAR(vkCode, scanCode);
@@ -146,36 +137,15 @@ public class Windows {
                                     imprimeChar(s);
 
                                     acento = '0';
-                                    shiftPressionado = false;
-
 
                                 } else if (!Character.isISOControl(teclaDigitada) && caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
 
                                     char s = caracter.shiftCharacter(teclaDigitada, shiftPressionado);
                                     imprimeChar(s);
 
-                                } else if (Win32.VK_SHIFT == vkCode) {
-
-                                    shiftPressionado = false;
                                 } else if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
 
-                                    if (caracterEspecial.equalsIgnoreCase("NOT_PRINT")) {
-                                        caracterEspecial = "";
-                                        return;
-                                    }
-                                    
-                                    if (totalTeclasHotKey > 0) {
-                                        totalTeclasHotKey--;
-                                        
-                                        if (!caracterEspecial.equalsIgnoreCase("")) {
-                                            imprimeString(caracterEspecial);
-                                        }
-                                        return;
-                                    }
-
-                                    if (caracterEspecial.equalsIgnoreCase("")) {
-                                        caracterEspecial = caracter.isCaracterEspecial(vkCode);
-                                    }
+                                    caracterEspecial = caracter.isCaracterEspecial(vkCode);
 
                                     if (caracterEspecial.equalsIgnoreCase("[CAPSLOCK]")) {
                                         if ((isCapslockAtivado = !isCapslockAtivado) == true) {
@@ -186,7 +156,12 @@ public class Windows {
                                     } else if (caracterEspecial.equalsIgnoreCase("[ENTER]")) {
                                         caracterEspecial += "\n";
                                         tamanhoLinhaAtual = 0;
+                                    } else if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
+                                        ctrlPressionado = true;
+                                    } else if (caracterEspecial.equalsIgnoreCase("[ALT]")) {
+                                        altPressionado = true;
                                     }
+
                                     imprimeString(caracterEspecial);
                                     caracterEspecial = "";
                                 }
@@ -194,6 +169,46 @@ public class Windows {
                             } else {
 
                                 acento = caracter.getAcento(vkCode, shiftPressionado);
+                            }
+
+                            if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+                                caracterEspecial += caracter.isCaracterEspecial(vkCode);
+                            }
+
+                        } else if (!isTeclaPressionada) {
+
+                            if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+                                
+                                caracterEspecial = caracter.isCaracterEspecial(vkCode);
+                                
+                                if (caracterEspecial.equalsIgnoreCase("[SHIFT]")) {
+                                    shiftPressionado = false;
+                                } else if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
+                                    ctrlPressionado = false;
+                                } else if (caracterEspecial.equalsIgnoreCase("[ALT]")) {
+                                    altPressionado = false;
+                                }
+
+                                if (ctrlPressionado) {
+
+                                    if (altPressionado && caracterEspecial.equalsIgnoreCase("[DELETE]")) {
+                                        imprimeString(caracterEspecial);
+                                    } else if (shiftPressionado && caracterEspecial.equalsIgnoreCase("[ESC]")) {
+                                        imprimeString(caracterEspecial);
+                                    }
+                                }
+
+                                if (altPressionado) {
+
+                                    if (caracterEspecial.equalsIgnoreCase("[TAB]")) {
+                                        imprimeString(caracterEspecial);
+                                    } else if (caracterEspecial.equalsIgnoreCase("[F4]")) {
+                                        imprimeString(caracterEspecial);
+                                    }
+
+                                }
+                                
+                                caracterEspecial = "";
                             }
                         }
                     }
@@ -207,15 +222,42 @@ public class Windows {
         }
 
         public void iniciarCapturaTeclasDigitadas() {
-            Hook.KEYBOARD.addListener(this, hookEventListener);
-            Hook.KEYBOARD.install(this);
-            registrarHotKeys();
+            Hook.KEYBOARD.addListener(Windows.this, hookEventListener);
+            Hook.KEYBOARD.install(Windows.this);
+            rodando = true;
+
+            new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    while (rodando) {
+                        if (controlaTeclaImpressa == 0 && Hook.KEYBOARD.isInstalled(Windows.this)) {
+                            Hook.KEYBOARD.uninstall(Windows.this);
+                            Hook.KEYBOARD.install(Windows.this);
+                        }
+                        controlaTeclaImpressa = 0;
+                        try {
+                            
+                            Thread.sleep(3000);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(Windows.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    System.out.println("Removendo");
+                    Hook.KEYBOARD.removeListener(Windows.this, hookEventListener);
+                    Hook.KEYBOARD.uninstall(Windows.this);
+                }
+            }).start();
+
+            //registrarHotKeys();
         }
 
         public void pararCapturaTeclasDigitadas() {
-            Hook.KEYBOARD.removeListener(this, hookEventListener);
-            Hook.KEYBOARD.uninstall(this);
-            desregistrarHotKeys();
+            Hook.KEYBOARD.removeListener(Windows.this, hookEventListener);
+            Hook.KEYBOARD.uninstall(Windows.this);
+
+//            desregistrarHotKeys();
         }
 
         private void registrarHotKeys() {
@@ -233,18 +275,23 @@ public class Windows {
             JIntellitype.getInstance().removeHotKeyListener(this);
         }
 
-        private boolean isPressedShift(int key, boolean tcPressionada) {
+        private boolean isPressedShift(int key) {
 
-            return (key == Win32.VK_SHIFT && tcPressionada);
+            return (key == Win32.VK_SHIFT);
 
         }
 
         private void imprimeChar(char s) {
+            
+            System.out.print(captulacaoCorreta(s));
+            adicionarValorTamanhoLinhaAtual(1);
+            totalRepeticoesTeclasNormaisPressionadas = 0;
+            
 
             if (totalRepeticoesTeclasNormaisPressionadas > 1) {
                 for (int i = 0; i < totalRepeticoesTeclasNormaisPressionadas; i++) {
                     System.out.print(captulacaoCorreta(s));
-                    adicionarValorTamanhoLinhaAtual(1);
+                    
                 }
             } else {
                 if (isTeclaMantidaPressionada
@@ -253,10 +300,8 @@ public class Windows {
                     imprimeString(caracterEspecial);
                     caracterEspecial = "NOT_PRINT";
                 }
-                System.out.print(captulacaoCorreta(s));
+                
             }
-
-            totalRepeticoesTeclasNormaisPressionadas = 0;
         }
 
         private void imprimeString(String s) {
