@@ -54,9 +54,9 @@ public class Caracter {
             case Win32.VK_MENU:
                 caracterEspecial = "[ALT]";
                 break;
-            case Win32.VK_SPACE:
-                caracterEspecial = "[ESPAÇO]";
-                break;
+//            case Win32.VK_SPACE:
+//                caracterEspecial = "[ESPAÇO]";
+//                break;
             case Caracter.VK_CONTEXT_MENU:
                 caracterEspecial = "[CONTEXTMENU]";
                 break;
