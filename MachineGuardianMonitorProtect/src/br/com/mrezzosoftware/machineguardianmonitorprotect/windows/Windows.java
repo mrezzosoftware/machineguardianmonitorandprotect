@@ -19,7 +19,7 @@ import org.sf.feeling.swt.win32.extension.hook.listener.HookEventListener;
 
 /**
  *
- * @author Marina
+ * @author MRezzo Software
  */
 public class Windows {
 
@@ -75,6 +75,10 @@ public class Windows {
         }
     }
 
+    public class SO {
+        
+    }
+
     public class Teclado implements HotkeyListener, IntellitypeListener {
 
         private boolean isTeclaPressionada = false;
@@ -84,10 +88,10 @@ public class Windows {
         private boolean altPressionado = false;
         private boolean isCapslockAtivado = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
         private boolean rodando = false;
+        private boolean reinstalarHook = false;
         private char acento;
         private char teclaDigitada;
         private int quantidadeTeclasHotKeyImpressa = 0;
-        private int controlaTeclaImpressa = 0;
         private int vkCode, scanCode;
         private int totalRepeticoesTeclasEspeciaisPressionadas = 1;
         private int totalRepeticoesTeclasNormaisPressionadas = 0;
@@ -109,8 +113,6 @@ public class Windows {
 
                 @Override
                 public void acceptHookData(HookData hookData) {
-
-                    controlaTeclaImpressa = 1;
 
                     if (quantidadeTeclasHotKeyImpressa == 0) {
 
@@ -193,8 +195,10 @@ public class Windows {
 
                                     if (altPressionado && caracterEspecial.equalsIgnoreCase("[DELETE]")) {
                                         imprimeString(caracterEspecial);
+                                        reinstalarHook = true;
                                     } else if (shiftPressionado && caracterEspecial.equalsIgnoreCase("[ESC]")) {
                                         imprimeString(caracterEspecial);
+                                        reinstalarHook = true;
                                     }
                                 }
 
@@ -232,11 +236,11 @@ public class Windows {
                 public void run() {
 
                     while (rodando) {
-                        if (controlaTeclaImpressa == 0 && Hook.KEYBOARD.isInstalled(Windows.this)) {
+                        if (reinstalarHook && Hook.KEYBOARD.isInstalled(Windows.this)) {
                             Hook.KEYBOARD.uninstall(Windows.this);
                             Hook.KEYBOARD.install(Windows.this);
+                            reinstalarHook = false;
                         }
-                        controlaTeclaImpressa = 0;
                         try {
                             
                             Thread.sleep(3000);
@@ -244,7 +248,7 @@ public class Windows {
                             Logger.getLogger(Windows.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                    System.out.println("Removendo");
+                    System.out.println("Desinstalando Hook");
                     Hook.KEYBOARD.removeListener(Windows.this, hookEventListener);
                     Hook.KEYBOARD.uninstall(Windows.this);
                 }
