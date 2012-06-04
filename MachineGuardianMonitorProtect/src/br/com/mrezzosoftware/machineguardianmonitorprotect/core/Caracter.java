@@ -36,9 +36,9 @@ public class Caracter {
             case Win32.VK_ESCAPE:
                 caracterEspecial = "[ESC]";
                 break;
-            case Win32.VK_TAB:
-                caracterEspecial = "[TAB]";
-                break;
+//            case Win32.VK_TAB:
+//                caracterEspecial = "[TAB]";
+//                break;
             case Win32.VK_CAPITAL:
                 caracterEspecial = "[CAPSLOCK]";
                 break;
