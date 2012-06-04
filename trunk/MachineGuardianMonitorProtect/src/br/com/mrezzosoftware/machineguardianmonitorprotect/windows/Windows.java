@@ -1,9 +1,10 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect.windows;
 
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.*;
-import com.melloware.jintellitype.HotkeyListener;
-import com.melloware.jintellitype.IntellitypeListener;
-import com.melloware.jintellitype.JIntellitype;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.Caracter;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyKernel32;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyPowrProf;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyPsapi;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyUser32;
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.PointerByReference;
@@ -11,7 +12,6 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.sf.feeling.swt.win32.extension.Win32;
 import org.sf.feeling.swt.win32.extension.hook.Hook;
 import org.sf.feeling.swt.win32.extension.hook.data.HookData;
 import org.sf.feeling.swt.win32.extension.hook.data.KeyboardHookData;
@@ -23,19 +23,21 @@ import org.sf.feeling.swt.win32.extension.hook.listener.HookEventListener;
  */
 public class Windows {
 
+    private MyUser32 user32 = (MyUser32) Native.loadLibrary("user32", MyUser32.class);
+    private MyKernel32 kernel32 = (MyKernel32) Native.loadLibrary("kernel32", MyKernel32.class);
+    private MyPsapi psapi = (MyPsapi) Native.loadLibrary("psapi", MyPsapi.class);
+    private MyPowrProf powrProf = (MyPowrProf) Native.loadLibrary("powrprof", MyPowrProf.class);
     public final Processos Processos;
     public final Teclado Teclado;
+    public final SO SO;
 
     public Windows() {
         Processos = new Processos();
         Teclado = new Teclado();
+        SO = new SO();
     }
 
     public class Processos {
-
-        private MyUser32 user32 = (MyUser32) Native.loadLibrary("user32", MyUser32.class);
-        private MyKernel32 kernel32 = (MyKernel32) Native.loadLibrary("kernel32", MyKernel32.class);
-        private MyPsapi psapi = (MyPsapi) Native.loadLibrary("psapi", MyPsapi.class);
 
         private Processos() {
         }
@@ -76,10 +78,43 @@ public class Windows {
     }
 
     public class SO {
+
+        private final int LOGOFF = 0;
+        private final int POWEROFF = 0x00000008;
+        private final int REBOOT = 0x00000002;
+        private final int RESTARTAPPS = 0x00000040;
+        private final int SHUTDOWN = 0x00000001;
+        private final int FORCE = 0x00000004;
+        private final int FORCEIFHUNG = 0x00000010;
+
+        private SO() {
+        }
+
+        public void bloquearEstacaoTrabalho() {
+            user32.LockWorkStation();
+        }
+
+        public void fazerLogoff(boolean forcarLogoff) {
+            user32.ExitWindowsEx(LOGOFF, ((forcarLogoff) ? FORCE : 0));
+        }
+        
+        public void hibernarComputador() {
+            powrProf.SetSuspendState(true, false, true);
+        }
+
+        public void reiniciarComputador(boolean forcarReinicializacao) {
+
+            user32.ExitWindowsEx(REBOOT, ((forcarReinicializacao) ? FORCE : 0));
+
+        }
+
+        public void desligarComputador(boolean forcarReinicializacao) {
+            user32.ExitWindowsEx(SHUTDOWN, ((forcarReinicializacao) ? FORCE : 0));
+        }
         
     }
 
-    public class Teclado implements HotkeyListener, IntellitypeListener {
+    public class Teclado {
 
         private boolean isTeclaPressionada = false;
         private boolean isTeclaMantidaPressionada = false;
@@ -91,18 +126,15 @@ public class Windows {
         private boolean reinstalarHook = false;
         private char acento;
         private char teclaDigitada;
-        private int quantidadeTeclasHotKeyImpressa = 0;
         private int vkCode, scanCode;
-        private int totalRepeticoesTeclasEspeciaisPressionadas = 1;
+        private int posicaoCarroEscritaPalavra = 0;
         private int totalRepeticoesTeclasNormaisPressionadas = 0;
         private int tamanhoLinhaAtual = 0;
         private KeyboardHookData keyboardHookData;
         private HookEventListener hookEventListener;
         private Caracter caracter = new Caracter();
         private String caracterEspecial = "";
-        private StringBuffer palavra = new StringBuffer();
-        private final int CTRL_ALT_DEL = 0;
-        private final int CTRL_A = 1;
+        private StringBuilder palavra = new StringBuilder();
 
         private Teclado() {
             criarObjetos();
@@ -114,111 +146,141 @@ public class Windows {
                 @Override
                 public void acceptHookData(HookData hookData) {
 
-                    if (quantidadeTeclasHotKeyImpressa == 0) {
+                    keyboardHookData = (KeyboardHookData) hookData;
+                    // Indica se a tecla foi pressionada (keyPressed = true) ou solta (keyReleased = false).
+                    isTeclaPressionada = keyboardHookData.getTransitionState();
+                    // Indica se a tecla pressionada anteriormente continua mantida pressionada.
+                    isTeclaMantidaPressionada = keyboardHookData.getPreviousState();
+                    // Obtém o Virtual Key Code da tecla pressionada.
+                    vkCode = keyboardHookData.getWParam();
 
-                        keyboardHookData = (KeyboardHookData) hookData;
-                        // Indica se a tecla foi pressionada (keyPressed = true) ou solta (keyReleased = false).
-                        isTeclaPressionada = keyboardHookData.getTransitionState();
-                        // Indica se a tecla pressionada anteriormente continua mantida pressionada.
-                        isTeclaMantidaPressionada = keyboardHookData.getPreviousState();
-                        // Obtém o Virtual Key Code da tecla pressionada.
-                        vkCode = keyboardHookData.getWParam();
+                    if (isTeclaPressionada) {
 
-                        if (isTeclaPressionada) {
+                        if (!caracter.isAcento(vkCode)) {
 
-                            if (isPressedShift(vkCode)) {
-                                shiftPressionado = true;
-                            }
+                            teclaDigitada = caracter.converteASCIItoCHAR(vkCode, scanCode);
 
-                            if (!caracter.isAcento(vkCode)) {
-
-                                teclaDigitada = caracter.converteASCIItoCHAR(vkCode, scanCode);
-
-                                if (caracter.isVogal(teclaDigitada) && acento != '0') {
-                                    char s = caracter.vogalAcentuada(teclaDigitada, acento);
-                                    imprimeChar(s);
-
-                                    acento = '0';
-
-                                } else if (!Character.isISOControl(teclaDigitada) && caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-
-                                    char s = caracter.shiftCharacter(teclaDigitada, shiftPressionado);
-                                    imprimeChar(s);
-
-                                } else if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-
-                                    caracterEspecial = caracter.isCaracterEspecial(vkCode);
-
-                                    if (caracterEspecial.equalsIgnoreCase("[CAPSLOCK]")) {
-                                        if ((isCapslockAtivado = !isCapslockAtivado) == true) {
-                                            caracterEspecial += "[ON]";
-                                        } else {
-                                            caracterEspecial += "[OFF]";
-                                        }
-                                    } else if (caracterEspecial.equalsIgnoreCase("[ENTER]")) {
-                                        caracterEspecial += "\n";
-                                        tamanhoLinhaAtual = 0;
-                                    } else if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
-                                        ctrlPressionado = true;
-                                    } else if (caracterEspecial.equalsIgnoreCase("[ALT]")) {
-                                        altPressionado = true;
-                                    }
-
-                                    imprimeString(caracterEspecial);
-                                    caracterEspecial = "";
-                                }
-
-                            } else {
-
-                                acento = caracter.getAcento(vkCode, shiftPressionado);
-                            }
-
-                            if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-                                caracterEspecial += caracter.isCaracterEspecial(vkCode);
-                            }
-
-                        } else if (!isTeclaPressionada) {
-
-                            if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+                            if (caracter.isVogal(teclaDigitada) && acento != '0') {
+                                char s = caracter.vogalAcentuada(teclaDigitada, acento);
                                 
+                                if (palavra.length() > 0) {
+                                    palavra.insert(posicaoCarroEscritaPalavra, s);
+                                } else {
+                                    palavra.append(s);
+                                }
+                                
+                                posicaoCarroEscritaPalavra++;
+
+                                acento = '0';
+
+                            } else if (!Character.isISOControl(teclaDigitada) && caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+
+                                char s = caracter.shiftCharacter(teclaDigitada, shiftPressionado);
+                                
+                                if (palavra.length() > 0) {
+                                    //palavra.append(s);
+                                    palavra.insert(posicaoCarroEscritaPalavra, s);
+                                } else {
+                                    palavra.append(s);
+                                }
+                                
+                                posicaoCarroEscritaPalavra++;
+                                
+                                System.out.println("posicaoCarroEscritaPalavra: " + posicaoCarroEscritaPalavra);
+                                System.out.println("palavra.length(): " + palavra.length());
+
+                            } else if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+
                                 caracterEspecial = caracter.isCaracterEspecial(vkCode);
-                                
-                                if (caracterEspecial.equalsIgnoreCase("[SHIFT]")) {
-                                    shiftPressionado = false;
+
+                                if (caracterEspecial.equalsIgnoreCase("[ENTER]")) {
+                                    imprimeString(palavra.toString());
+                                    palavra.delete(0, palavra.length());
+                                    posicaoCarroEscritaPalavra = 0;
+                                    tamanhoLinhaAtual = 0;
+                                } else if (caracterEspecial.equalsIgnoreCase("[SHIFT]")) {
+                                    shiftPressionado = true;
                                 } else if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
-                                    ctrlPressionado = false;
+                                    ctrlPressionado = true;
                                 } else if (caracterEspecial.equalsIgnoreCase("[ALT]")) {
-                                    altPressionado = false;
-                                }
-
-                                if (ctrlPressionado) {
-
-                                    if (altPressionado && caracterEspecial.equalsIgnoreCase("[DELETE]")) {
-                                        imprimeString(caracterEspecial);
-                                        reinstalarHook = true;
-                                    } else if (shiftPressionado && caracterEspecial.equalsIgnoreCase("[ESC]")) {
-                                        imprimeString(caracterEspecial);
-                                        reinstalarHook = true;
+                                    altPressionado = true;
+                                } else if (caracterEspecial.equalsIgnoreCase("[CAPSLOCK]")) {
+                                    isCapslockAtivado = !isCapslockAtivado;
+                                } else if (caracterEspecial.equalsIgnoreCase("[SETA_ESQUERDA]")) {
+                                    
+                                    if ((posicaoCarroEscritaPalavra-1) >= 0) {
+                                        posicaoCarroEscritaPalavra--;
                                     }
-                                }
-
-                                if (altPressionado) {
-
-                                    if (caracterEspecial.equalsIgnoreCase("[TAB]")) {
-                                        imprimeString(caracterEspecial);
-                                    } else if (caracterEspecial.equalsIgnoreCase("[F4]")) {
-                                        imprimeString(caracterEspecial);
+                                    
+                                } else if (caracterEspecial.equalsIgnoreCase("[SETA_DIREITA]")) {
+                                    
+                                    if ((posicaoCarroEscritaPalavra+1) <= palavra.length()) {
+                                        posicaoCarroEscritaPalavra++;
                                     }
-
+                                    
+                                } else if (caracterEspecial.equalsIgnoreCase("[HOME]")) {
+                                    
+                                    posicaoCarroEscritaPalavra = 0;
+                                    
+                                } else if (caracterEspecial.equalsIgnoreCase("[END]")) {
+                                    
+                                    posicaoCarroEscritaPalavra = palavra.length();
+                                    
+                                } else if (caracterEspecial.equalsIgnoreCase("[BACKSPACE]")) {
+                                    palavra.deleteCharAt(posicaoCarroEscritaPalavra-1);
                                 }
-                                
+
                                 caracterEspecial = "";
                             }
-                        }
-                    }
 
-                    if (quantidadeTeclasHotKeyImpressa > 0) {
-                        quantidadeTeclasHotKeyImpressa--;
+                        } else {
+
+                            acento = caracter.getAcento(vkCode, shiftPressionado);
+                        }
+
+                        if (palavra.length() >= 80) {
+                            imprimeString(palavra.toString());
+                            palavra.delete(0, palavra.length());
+                            posicaoCarroEscritaPalavra = 0;
+                        }
+
+                    } else if (!isTeclaPressionada) {
+
+                        if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+
+                            caracterEspecial = caracter.isCaracterEspecial(vkCode);
+
+                            if (caracterEspecial.equalsIgnoreCase("[SHIFT]")) {
+                                shiftPressionado = false;
+                            } else if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
+                                ctrlPressionado = false;
+                            } else if (caracterEspecial.equalsIgnoreCase("[ALT]")) {
+                                altPressionado = false;
+                            }
+
+                            if (ctrlPressionado) {
+
+                                if (altPressionado && caracterEspecial.equalsIgnoreCase("[DELETE]")) {
+                                    imprimeString(caracterEspecial);
+                                    reinstalarHook = true;
+                                } else if (shiftPressionado && caracterEspecial.equalsIgnoreCase("[ESC]")) {
+                                    imprimeString(caracterEspecial);
+                                    reinstalarHook = true;
+                                }
+                            }
+
+                            if (altPressionado) {
+
+                                if (caracterEspecial.equalsIgnoreCase("[TAB]")) {
+                                    imprimeString(caracterEspecial);
+                                } else if (caracterEspecial.equalsIgnoreCase("[F4]")) {
+                                    imprimeString(caracterEspecial);
+                                }
+
+                            }
+
+                            caracterEspecial = "";
+                        }
                     }
 
                 }
@@ -242,7 +304,7 @@ public class Windows {
                             reinstalarHook = false;
                         }
                         try {
-                            
+
                             Thread.sleep(3000);
                         } catch (InterruptedException ex) {
                             Logger.getLogger(Windows.class.getName()).log(Level.SEVERE, null, ex);
@@ -253,49 +315,23 @@ public class Windows {
                     Hook.KEYBOARD.uninstall(Windows.this);
                 }
             }).start();
-
-            //registrarHotKeys();
         }
 
         public void pararCapturaTeclasDigitadas() {
-            Hook.KEYBOARD.removeListener(Windows.this, hookEventListener);
-            Hook.KEYBOARD.uninstall(Windows.this);
-
-//            desregistrarHotKeys();
-        }
-
-        private void registrarHotKeys() {
-
-            if (JIntellitype.isJIntellitypeSupported()) {
-                System.out.println("SUPORTADO");
-                JIntellitype.getInstance().registerHotKey(CTRL_ALT_DEL, JIntellitype.MOD_CONTROL + JIntellitype.MOD_ALT, Teclas.VkCode.Delete.getVkCode());
-                JIntellitype.getInstance().registerHotKey(CTRL_A, JIntellitype.MOD_CONTROL, Teclas.VkCode.A.getVkCode());
-                JIntellitype.getInstance().addHotKeyListener(this);
-            }
-        }
-
-        private void desregistrarHotKeys() {
-            JIntellitype.getInstance().unregisterHotKey(CTRL_ALT_DEL);
-            JIntellitype.getInstance().removeHotKeyListener(this);
-        }
-
-        private boolean isPressedShift(int key) {
-
-            return (key == Win32.VK_SHIFT);
-
+            rodando = false;
         }
 
         private void imprimeChar(char s) {
-            
+
             System.out.print(captulacaoCorreta(s));
             adicionarValorTamanhoLinhaAtual(1);
             totalRepeticoesTeclasNormaisPressionadas = 0;
-            
+
 
             if (totalRepeticoesTeclasNormaisPressionadas > 1) {
                 for (int i = 0; i < totalRepeticoesTeclasNormaisPressionadas; i++) {
                     System.out.print(captulacaoCorreta(s));
-                    
+
                 }
             } else {
                 if (isTeclaMantidaPressionada
@@ -304,44 +340,34 @@ public class Windows {
                     imprimeString(caracterEspecial);
                     caracterEspecial = "NOT_PRINT";
                 }
-                
+
             }
         }
 
         private void imprimeString(String s) {
-
-            if (totalRepeticoesTeclasEspeciaisPressionadas > 1) {
-                for (int i = 0; i < totalRepeticoesTeclasEspeciaisPressionadas; i++) {
-                    System.out.print(s);
-                    adicionarValorTamanhoLinhaAtual(s.length());
-                }
-            } else {
-                System.out.print(s);
-                adicionarValorTamanhoLinhaAtual(s.length());
-            }
-
-            totalRepeticoesTeclasEspeciaisPressionadas = 1;
+            System.out.print(s);
+            adicionarValorTamanhoLinhaAtual(s.length());
         }
-
-        public void lePalavra(char key) {
-
-            if (!palavra.equals(null)) {
-
-                if (Character.isSpaceChar(key)) {
-                    int ini = 0;
-                    int fim = palavra.length();
-                    //System.out.println(palavra.toString());
-                    palavra.delete(ini, fim);
-
-                } else {
-                    palavra.append(key);
-                }
-
-
-            }
-
-
-        }
+//
+//        public void lePalavra(char key) {
+//
+//            if (!palavra.equals(null)) {
+//
+//                if (Character.isSpaceChar(key)) {
+//                    int ini = 0;
+//                    int fim = palavra.length();
+//                    //System.out.println(palavra.toString());
+//                    palavra.delete(ini, fim);
+//
+//                } else {
+//                    palavra.append(key);
+//                }
+//
+//
+//            }
+//
+//
+//        }
 
         private char captulacaoCorreta(char aCaracter) {
             return (shiftPressionado || isCapslockAtivado) ? Character.toUpperCase(aCaracter) : aCaracter;
@@ -354,19 +380,6 @@ public class Windows {
                 System.out.println("");
                 tamanhoLinhaAtual = 0;
             }
-        }
-
-        @Override
-        public void onHotKey(int i) {
-            if (i == CTRL_A) {
-                imprimeString("[CTRL]+A");
-                quantidadeTeclasHotKeyImpressa = 2;
-            }
-        }
-
-        @Override
-        public void onIntellitype(int i) {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 }

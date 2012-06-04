@@ -31,8 +31,11 @@ public interface MyUser32 extends Library {
     HHOOK SetWindowsHookExW(int i, HOOKPROC hkprc, HINSTANCE hnstnc, int i1);
     LRESULT CallNextHookEx(HHOOK hhook, int i, WinDef.WPARAM wparam, Pointer pntr);
     boolean UnhookWindowsHookEx(HHOOK hhook);
-    public int GetMessageW(WinUser.MSG msg, HWND hwnd, int i, int i1);
-    public boolean TranslateMessage(WinUser.MSG msg);
-    public LRESULT DispatchMessage(WinUser.MSG msg);
+    int GetMessageW(WinUser.MSG msg, HWND hwnd, int i, int i1);
+    boolean TranslateMessage(WinUser.MSG msg);
+    LRESULT DispatchMessage(WinUser.MSG msg);
+    
+    boolean ExitWindowsEx(int flags, int reason);
+    boolean LockWorkStation();
     
 }
