@@ -1,6 +1,9 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect;
 
 import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.Windows;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 
@@ -31,25 +34,47 @@ public class MGMPMain extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jEPane = new javax.swing.JEditorPane();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        jScrollPane1.setViewportView(jEPane);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void iniciar() {
-        windows.Teclado.iniciarCapturaTeclasDigitadas();
+        //windows.Teclado.iniciarCapturaTeclasDigitadas();
         //windows.SO.hibernarComputador();
+        
+        String url = "http://www.apl.jhu.edu/~hall/java/Swing-Tutorial/Swing-Tutorial-JEditorPane.html";
+        try {
+            jEPane.setContentType("text/html");
+            jEPane.setEditable(false);
+            jEPane.setPage(url);
+            this.add(new javax.swing.JScrollPane(jEPane));
+        } catch (IOException ex) {
+            Logger.getLogger(MGMPMain.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            
     }
     
     
@@ -96,9 +121,11 @@ public class MGMPMain extends javax.swing.JDialog {
                 System.exit(0);
             }
         });
-        //dialog.setVisible(true);
+        dialog.setVisible(true);
         
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JEditorPane jEPane;
+    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }
