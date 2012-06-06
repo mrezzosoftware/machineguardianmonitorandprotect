@@ -1,10 +1,6 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect.windows;
 
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.Caracter;
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyKernel32;
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyPowrProf;
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyPsapi;
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.MyUser32;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.*;
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinNT;
 import com.sun.jna.ptr.PointerByReference;
