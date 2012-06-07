@@ -1,15 +1,6 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect;
 
 import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.MGMPWindows;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.widgets.Composite;
-import org.sf.feeling.swt.win32.extension.system.Kernel;
-
-
 
 /**
  *
