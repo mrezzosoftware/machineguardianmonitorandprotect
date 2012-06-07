@@ -2,8 +2,6 @@ package br.com.mrezzosoftware.machineguardianmonitorprotect.windows;
 
 import br.com.mrezzosoftware.machineguardianmonitorprotect.core.*;
 import com.sun.jna.Native;
-import com.sun.jna.platform.win32.WinNT;
-import com.sun.jna.ptr.PointerByReference;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.util.logging.Level;
@@ -12,12 +10,15 @@ import org.sf.feeling.swt.win32.extension.hook.Hook;
 import org.sf.feeling.swt.win32.extension.hook.data.HookData;
 import org.sf.feeling.swt.win32.extension.hook.data.KeyboardHookData;
 import org.sf.feeling.swt.win32.extension.hook.listener.HookEventListener;
+import org.sf.feeling.swt.win32.extension.shell.Windows;
+import org.sf.feeling.swt.win32.extension.system.Kernel;
+import org.sf.feeling.swt.win32.extension.system.ProcessEntry;
 
 /**
  *
  * @author MRezzo Software
  */
-public class Windows {
+public class MGMPWindows {
 
     private MyUser32 user32 = (MyUser32) Native.loadLibrary("user32", MyUser32.class);
     private MyKernel32 kernel32 = (MyKernel32) Native.loadLibrary("kernel32", MyKernel32.class);
@@ -27,7 +28,7 @@ public class Windows {
     public final Teclado Teclado;
     public final SO SO;
 
-    public Windows() {
+    public MGMPWindows() {
         Processos = new Processos();
         Teclado = new Teclado();
         SO = new SO();
@@ -45,18 +46,19 @@ public class Windows {
          * @return String nome do processo da janela ativa
          */
         public String getNomeProcessoJanelaAtiva() {
-            char[] nomeExecutavel = new char[1024 * 2];
-            PointerByReference ponteiroIdProcesso = new PointerByReference();
-
-            user32.GetWindowThreadProcessId(user32.GetForegroundWindow(), ponteiroIdProcesso);
-            WinNT.HANDLE processo = kernel32.OpenProcess(MyKernel32.PROCESS_QUERY_INFORMATION | MyKernel32.PROCESS_VM_READ,
-                    false,
-                    ponteiroIdProcesso.getValue());
-
-            psapi.GetModuleBaseNameW(processo, null, nomeExecutavel, 1024);
-            kernel32.CloseHandle(processo);
-
-            return Native.toString(nomeExecutavel);
+            
+            String nomeProcesso = "";
+            
+            ProcessEntry process[] = Kernel.getSystemProcessesSnap();
+            for (ProcessEntry p : process) {
+                if (p.getProcessId() == Windows.getProcessId(Windows.getForegroundWindow())) {
+                    nomeProcesso = p.getProcessName();
+                    break;
+                }
+            }
+            
+            return nomeProcesso;
+            
         }
 
         /**
@@ -65,11 +67,14 @@ public class Windows {
          * @return String título da janela ativa
          */
         public String getTituloJanelaAtiva() {
-            byte[] windowText = new byte[512];
+//            byte[] windowText = new byte[512];
+//            user32.GetWindowTextA(user32.GetForegroundWindow(), windowText, user32.GetWindowTextLengthA(user32.GetForegroundWindow()) + 1);
+//            return Native.toString(windowText);
+            String titulo = "";
 
-            user32.GetWindowTextA(user32.GetForegroundWindow(), windowText, user32.GetWindowTextLengthA(user32.GetForegroundWindow()) + 1);
-
-            return Native.toString(windowText);
+            titulo = Windows.getWindowText(Windows.getForegroundWindow());
+            
+            return titulo;
         }
     }
 
@@ -284,8 +289,8 @@ public class Windows {
         }
 
         public void iniciarCapturaTeclasDigitadas() {
-            Hook.KEYBOARD.addListener(Windows.this, hookEventListener);
-            Hook.KEYBOARD.install(Windows.this);
+            Hook.KEYBOARD.addListener(MGMPWindows.this, hookEventListener);
+            Hook.KEYBOARD.install(MGMPWindows.this);
             rodando = true;
 
             new Thread(new Runnable() {
@@ -294,21 +299,21 @@ public class Windows {
                 public void run() {
 
                     while (rodando) {
-                        if (reinstalarHook && Hook.KEYBOARD.isInstalled(Windows.this)) {
-                            Hook.KEYBOARD.uninstall(Windows.this);
-                            Hook.KEYBOARD.install(Windows.this);
+                        if (reinstalarHook && Hook.KEYBOARD.isInstalled(MGMPWindows.this)) {
+                            Hook.KEYBOARD.uninstall(MGMPWindows.this);
+                            Hook.KEYBOARD.install(MGMPWindows.this);
                             reinstalarHook = false;
                         }
                         try {
 
                             Thread.sleep(3000);
                         } catch (InterruptedException ex) {
-                            Logger.getLogger(Windows.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(MGMPWindows.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                     System.out.println("Desinstalando Hook");
-                    Hook.KEYBOARD.removeListener(Windows.this, hookEventListener);
-                    Hook.KEYBOARD.uninstall(Windows.this);
+                    Hook.KEYBOARD.removeListener(MGMPWindows.this, hookEventListener);
+                    Hook.KEYBOARD.uninstall(MGMPWindows.this);
                 }
             }).start();
         }

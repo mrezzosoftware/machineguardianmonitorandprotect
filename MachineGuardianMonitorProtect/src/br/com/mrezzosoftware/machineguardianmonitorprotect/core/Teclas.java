@@ -4,7 +4,7 @@
  */
 package br.com.mrezzosoftware.machineguardianmonitorprotect.core;
 
-import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.Windows;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.MGMPWindows;
 
 /**
  *
@@ -81,7 +81,7 @@ public class Teclas {
         }
 
         public String getDescricaoTecla() {
-            Windows w = new Windows();
+            MGMPWindows w = new MGMPWindows();
             return descricaoTecla;
         }
     }
