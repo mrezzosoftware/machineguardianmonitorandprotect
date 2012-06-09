@@ -80,7 +80,6 @@ public class Teclado {
             @Override
             public void run() {
                 while(Keyboard_LLHook.isInstalled()) {
-                    System.out.println("INSTALADO");
                     try {
                         Thread.sleep(3000);
                     } catch (InterruptedException ex) {
@@ -90,127 +89,127 @@ public class Teclado {
             }
         }).start();
 
-        Hook.KEYBOARD.addListener(this, new HookEventListener() {
-
-            public void acceptHookData(HookData hookData) {
-
-                keyboardHookData = (KeyboardHookData) hookData;
-                isTeclaPressionada = keyboardHookData.getTransitionState();
-                isTeclaMantidaPressionada = keyboardHookData.getPreviousState();
-                vkCode = keyboardHookData.getWParam();
-
-                //System.out.println("tecla: " + vkCode);
-                //System.out.println("keyboardHookData.getPreviousState(): " + keyboardHookData.getPreviousState());
-                //System.out.println("keyboardHookData.getRepeatCount(): " + keyboardHookData.getRepeatCount());
-
-//                if (isTeclaMantidaPressionada) {
-//                    if (vkCode != ultimoVKCode  && !isTeclaPressionada) {
-//                        caracterEspecial = caracter.isCaracterEspecial(ultimoVKCode);
-//                        if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-//                            imprimeString(caracterEspecial);
-//                            imprimeString(caracter.isCaracterEspecial(vkCode));
-//                        }
-//                    } else {
-//                        vkCode = -1;
+//        Hook.KEYBOARD.addListener(this, new HookEventListener() {
+//
+//            public void acceptHookData(HookData hookData) {
+//
+//                keyboardHookData = (KeyboardHookData) hookData;
+//                isTeclaPressionada = keyboardHookData.getTransitionState();
+//                isTeclaMantidaPressionada = keyboardHookData.getPreviousState();
+//                vkCode = keyboardHookData.getWParam();
+//
+//                //System.out.println("tecla: " + vkCode);
+//                //System.out.println("keyboardHookData.getPreviousState(): " + keyboardHookData.getPreviousState());
+//                //System.out.println("keyboardHookData.getRepeatCount(): " + keyboardHookData.getRepeatCount());
+//
+////                if (isTeclaMantidaPressionada) {
+////                    if (vkCode != ultimoVKCode  && !isTeclaPressionada) {
+////                        caracterEspecial = caracter.isCaracterEspecial(ultimoVKCode);
+////                        if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+////                            imprimeString(caracterEspecial);
+////                            imprimeString(caracter.isCaracterEspecial(vkCode));
+////                        }
+////                    } else {
+////                        vkCode = -1;
+////                    }
+////                }
+//
+//                if (isTeclaPressionada) {
+//
+//                    if (isPressedShift(vkCode, isTeclaPressionada)) {
+//                        shiftPressionado = true;
 //                    }
+//
+//                    if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+//                        caracterEspecial = caracter.isCaracterEspecial(vkCode);
+//
+//                        if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
+//                            hotKeys[0] = caracterEspecial;
+//                            System.out.println("CTRL");
+//                        } else if (hotKeys[0].equalsIgnoreCase("[CTRL]")
+//                                && caracterEspecial.equalsIgnoreCase("[ALT]")) {
+//                            hotKeys[1] = caracterEspecial;
+//                            System.out.println("ALT");
+//                        } else if (hotKeys[0].equalsIgnoreCase("[CTRL]")
+//                                && hotKeys[1].equalsIgnoreCase("[ALT]")
+//                                && caracterEspecial.equalsIgnoreCase("[DELETE]")) {
+//                            System.out.println("DELETE");
+//                            hotKeys[2] = caracterEspecial;
+//                            imprimirHotKeys(hotKeys);
+//                            hotKeyImpressa = true;
+//                        }
+//                        
+//                        System.out.println(caracterEspecial);
+//
+//                    }
+//
+//                    if (isTeclaMantidaPressionada) {
+//                        if (caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+//                            totalRepeticoesTeclasNormaisPressionadas++;
+//                        } else {
+//                            totalRepeticoesTeclasEspeciaisPressionadas++;
+//                        }
+//                    }
+//
+//                } else if (!isTeclaPressionada) {
+//                    if (!caracter.isAcento(vkCode)) {
+//
+//                        teclaDigitada = caracter.converteASCIItoCHAR(vkCode, scanCode);
+//
+//                        if (caracter.isVogal(teclaDigitada) && acento != '0') {
+//                            char s = caracter.vogalAcentuada(teclaDigitada, acento);
+//                            imprimeChar(s);
+//
+//                            acento = '0';
+//                            shiftPressionado = false;
+//
+//
+//                        } else if (!Character.isISOControl(teclaDigitada) && caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
+//
+//                            char s = caracter.shiftCharacter(teclaDigitada, shiftPressionado);
+//                            imprimeChar(s);
+//
+//                        } else if (Win32.VK_SHIFT == vkCode) {
+//
+//                            shiftPressionado = false;
+//                        } else if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("") && !caracterEspecial.equalsIgnoreCase("")) {
+//
+//                            caracterEspecial = caracter.isCaracterEspecial(vkCode);
+//
+//                            if (caracterEspecial.equalsIgnoreCase("[CAPSLOCK]")) {
+//                                if ((isCapslockAtivado = !isCapslockAtivado) == true) {
+//                                    caracterEspecial += "[ON]";
+//                                } else {
+//                                    caracterEspecial += "[OFF]";
+//                                }
+//                            } else if (caracterEspecial.equalsIgnoreCase("[ENTER]\n")) {
+//                                tamanhoLinhaAtual = 0;
+//                            }
+//
+//                            if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
+//                                hotKeys[0] = "";
+//                            } else if (caracterEspecial.equalsIgnoreCase("[ALT]")) {
+//                                hotKeys[1] = "";
+//                            } else if (caracterEspecial.equalsIgnoreCase("[DELETE]") && hotKeyImpressa) {
+//                                hotKeyImpressa = false;
+//                                return;
+//                            }
+//
+//
+//
+//
+//                            imprimeString(caracterEspecial);
+//                        }
+//
+//                    } else {
+//
+//                        acento = caracter.getAcento(vkCode, shiftPressionado);
+//                    }
+//
 //                }
-
-                if (isTeclaPressionada) {
-
-                    if (isPressedShift(vkCode, isTeclaPressionada)) {
-                        shiftPressionado = true;
-                    }
-
-                    if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-                        caracterEspecial = caracter.isCaracterEspecial(vkCode);
-
-                        if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
-                            hotKeys[0] = caracterEspecial;
-                            System.out.println("CTRL");
-                        } else if (hotKeys[0].equalsIgnoreCase("[CTRL]")
-                                && caracterEspecial.equalsIgnoreCase("[ALT]")) {
-                            hotKeys[1] = caracterEspecial;
-                            System.out.println("ALT");
-                        } else if (hotKeys[0].equalsIgnoreCase("[CTRL]")
-                                && hotKeys[1].equalsIgnoreCase("[ALT]")
-                                && caracterEspecial.equalsIgnoreCase("[DELETE]")) {
-                            System.out.println("DELETE");
-                            hotKeys[2] = caracterEspecial;
-                            imprimirHotKeys(hotKeys);
-                            hotKeyImpressa = true;
-                        }
-                        
-                        System.out.println(caracterEspecial);
-
-                    }
-
-                    if (isTeclaMantidaPressionada) {
-                        if (caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-                            totalRepeticoesTeclasNormaisPressionadas++;
-                        } else {
-                            totalRepeticoesTeclasEspeciaisPressionadas++;
-                        }
-                    }
-
-                } else if (!isTeclaPressionada) {
-                    if (!caracter.isAcento(vkCode)) {
-
-                        teclaDigitada = caracter.converteASCIItoCHAR(vkCode, scanCode);
-
-                        if (caracter.isVogal(teclaDigitada) && acento != '0') {
-                            char s = caracter.vogalAcentuada(teclaDigitada, acento);
-                            imprimeChar(s);
-
-                            acento = '0';
-                            shiftPressionado = false;
-
-
-                        } else if (!Character.isISOControl(teclaDigitada) && caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
-
-                            char s = caracter.shiftCharacter(teclaDigitada, shiftPressionado);
-                            imprimeChar(s);
-
-                        } else if (Win32.VK_SHIFT == vkCode) {
-
-                            shiftPressionado = false;
-                        } else if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("") && !caracterEspecial.equalsIgnoreCase("")) {
-
-                            caracterEspecial = caracter.isCaracterEspecial(vkCode);
-
-                            if (caracterEspecial.equalsIgnoreCase("[CAPSLOCK]")) {
-                                if ((isCapslockAtivado = !isCapslockAtivado) == true) {
-                                    caracterEspecial += "[ON]";
-                                } else {
-                                    caracterEspecial += "[OFF]";
-                                }
-                            } else if (caracterEspecial.equalsIgnoreCase("[ENTER]\n")) {
-                                tamanhoLinhaAtual = 0;
-                            }
-
-                            if (caracterEspecial.equalsIgnoreCase("[CTRL]")) {
-                                hotKeys[0] = "";
-                            } else if (caracterEspecial.equalsIgnoreCase("[ALT]")) {
-                                hotKeys[1] = "";
-                            } else if (caracterEspecial.equalsIgnoreCase("[DELETE]") && hotKeyImpressa) {
-                                hotKeyImpressa = false;
-                                return;
-                            }
-
-
-
-
-                            imprimeString(caracterEspecial);
-                        }
-
-                    } else {
-
-                        acento = caracter.getAcento(vkCode, shiftPressionado);
-                    }
-
-                }
-            }
-        });
-        //Hook.KEYBOARD.install(this);
+//            }
+//        });
+//        //Hook.KEYBOARD.install(this, true);
 
     }
 

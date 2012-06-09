@@ -1,6 +1,7 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect;
 
 import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.MGMPWindows;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.monitor.Geolocation;
 
 /**
  *
@@ -50,6 +51,12 @@ public class MGMPMain extends javax.swing.JDialog {
         //windows.SO.hibernarComputador();
         //System.out.println("Titulo" + windows.Processos.getTituloJanelaAtiva());
         System.out.println("Titulo" + windows.Processos.getNomeProcessoJanelaAtiva());
+        
+        Geolocation geolocation = new Geolocation();
+        Geolocation.Coordenadas localAtual = geolocation.localizarUsuario();
+        
+        System.out.println("Latitude: " + localAtual.getLatitude());
+        System.out.println("Longitude: " + localAtual.getLongitude());
 
     }
     
