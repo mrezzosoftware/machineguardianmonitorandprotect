@@ -4,6 +4,7 @@
  */
 package br.com.mrezzosoftware.machineguardianmonitorprotect.windows.monitor;
 
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.NetworkUtil;
 import enumerations.Dot11BSSType;
 import functions.JWifiAPI;
 import java.io.BufferedReader;
@@ -14,10 +15,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import structures.Bss;
-import sun.misc.Compare;
 
 /**
  *
@@ -35,14 +34,15 @@ public class Geolocation {
 
         return localAtual;
     }
-    
+
     private Coordenadas getCoordenadas(Coordenadas output) {
         Coordenadas coord = new Coordenadas();
-        
-        try {
 
+        try {
+            
             URL url = new URL(getUrlConsulta());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            //Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("webcache.fnde.gov.br", 8080));
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection(NetworkUtil.getLocalProxy());
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
 
@@ -56,14 +56,14 @@ public class Geolocation {
 
             String saida;
             while ((saida = br.readLine()) != null) {
-                
+
                 if (saida.contains("lat")) {
                     coord.setLatitude(removerCaracteres(saida, " ", "\"", ":", ",", "lat"));
                 } else if (saida.contains("lng")) {
                     coord.setLongitude(removerCaracteres(saida, " ", "\"", ":", ",", "lng"));
                     break;
-                } 
-                    
+                }
+
             }
 
             conn.disconnect();
@@ -77,54 +77,61 @@ public class Geolocation {
             e.printStackTrace();
 
         }
-        
-        
+
+
         return coord;
     }
-    
+
     private String removerCaracteres(String alvo, String... caracteresParaRemover) {
-        
+
         for (String valorRemover : caracteresParaRemover) {
             alvo = alvo.replaceAll(valorRemover, "");
         }
-        
+
         return alvo;
     }
 
     private String getUrlConsulta() {
-        String url = "";
+        String url = URL_BASE;
         ArrayList<WifiInfo> listaAccessPoints;
 
-        JWifiAPI jWifiAPI = new JWifiAPI(JWifiAPI.getNegotiatedVersion(), JWifiAPI.enumInterfaces()[0].interfaceGuid);
+        try {
 
-        Bss accessPoints[] = jWifiAPI.getNetworkBssList(null, Dot11BSSType.any, false);
+            JWifiAPI jWifiAPI = new JWifiAPI(JWifiAPI.getNegotiatedVersion(), JWifiAPI.enumInterfaces()[0].interfaceGuid);
 
-        if (accessPoints.length > 0) {
-            listaAccessPoints = new ArrayList<WifiInfo>();
+            Bss accessPoints[] = jWifiAPI.getNetworkBssList(null, Dot11BSSType.any, false);
 
-            for (int i = 0; i < accessPoints.length; i++) {
-                listaAccessPoints.add(new WifiInfo(accessPoints[i].dot11Bssid.replaceAll("-", ":"),
-                        accessPoints[i].dot11Ssid,
-                        accessPoints[i].lRssi,
-                        accessPoints[i].uLinkQuality));
+            if (accessPoints.length > 0) {
+                listaAccessPoints = new ArrayList<WifiInfo>();
+
+                for (int i = 0; i < accessPoints.length; i++) {
+                    listaAccessPoints.add(new WifiInfo(accessPoints[i].dot11Bssid.replaceAll("-", ":"),
+                            accessPoints[i].dot11Ssid,
+                            accessPoints[i].lRssi,
+                            accessPoints[i].uLinkQuality));
+                }
+
+                Collections.sort(listaAccessPoints);
+
+                url = URL_BASE;
+                Iterator<WifiInfo> itWifiInfo = listaAccessPoints.iterator();
+
+                while (itWifiInfo.hasNext()) {
+
+                    WifiInfo aWifi = itWifiInfo.next();
+                    url += String.format(PARAMETROS_REQUISICAO, aWifi.mac, aWifi.ssid, aWifi.forcaSinal);
+                }
             }
+
+            url = codificarUrl(url);
+        } catch (exceptions.InternalErrorException e) {
+            System.out.println("SEM PLACA WIRELESS");
             
-            Collections.sort(listaAccessPoints);
-            
-            url = URL_BASE;
-            Iterator<WifiInfo> itWifiInfo = listaAccessPoints.iterator();
-            
-            while(itWifiInfo.hasNext()) {
-                    
-                WifiInfo aWifi = itWifiInfo.next();
-                url += String.format(PARAMETROS_REQUISICAO, aWifi.mac, aWifi.ssid, aWifi.forcaSinal);
-            }
         }
 
-        url = codificarUrl(url);
         return url;
     }
-    
+
     private String codificarUrl(String url) {
         return url.replaceAll(" ", "%20").replaceAll("\\|", "%7C");
     }
@@ -138,7 +145,10 @@ public class Geolocation {
 
         //System.out.println("Resultado: " + resultado);
         Geolocation geo = new Geolocation();
-        System.out.println("URL: " + geo.getUrlConsulta());
+        //System.out.println("URL: " + geo.getUrlConsulta());
+        Coordenadas coord = geo.localizarUsuario();
+        System.out.println(coord.getLatitude() + " " + coord.getLongitude());
+
 
     }
 
@@ -190,10 +200,11 @@ public class Geolocation {
         private String ssid;
         private int forcaSinal;
         private int qualidadeLink;
-        
-        public WifiInfo(){}
-        
-        public WifiInfo(String mac, String ssid, int forcaSinal, int qualidadeLink){
+
+        public WifiInfo() {
+        }
+
+        public WifiInfo(String mac, String ssid, int forcaSinal, int qualidadeLink) {
             this.mac = mac;
             this.ssid = ssid;
             this.forcaSinal = forcaSinal;
