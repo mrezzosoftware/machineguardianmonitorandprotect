@@ -41,7 +41,6 @@ public class Geolocation {
         try {
             
             URL url = new URL(getUrlConsulta());
-            //Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("webcache.fnde.gov.br", 8080));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection(NetworkUtil.getLocalProxy());
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
@@ -66,6 +65,7 @@ public class Geolocation {
 
             }
 
+            br.close();
             conn.disconnect();
 
         } catch (MalformedURLException e) {

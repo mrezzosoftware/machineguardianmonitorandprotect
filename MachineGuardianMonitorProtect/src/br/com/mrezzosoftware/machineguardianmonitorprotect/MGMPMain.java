@@ -1,7 +1,10 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect;
 
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.ServidorWeb;
 import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.MGMPWindows;
 import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.monitor.Geolocation;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  *
@@ -18,7 +21,7 @@ public class MGMPMain extends javax.swing.JDialog {
         super(parent, modal);
         windows = new MGMPWindows();
         initComponents();
-        iniciar();
+        configuracoes();
     }
 
     /**
@@ -89,67 +92,27 @@ public class MGMPMain extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void iniciar() {
-        //windows.Teclado.iniciarCapturaTeclasDigitadas();
-        //windows.SO.hibernarComputador();
-        //System.out.println("Titulo" + windows.Processos.getTituloJanelaAtiva());
-        System.out.println("Titulo" + windows.Processos.getNomeProcessoJanelaAtiva());
+    private void configuracoes() {
+        System.out.println("Titulo: " + windows.Processos.getNomeProcessoJanelaAtiva());
         
-//        Geolocation geolocation = new Geolocation();
-//        Geolocation.Coordenadas localAtual = geolocation.localizarUsuario();
-//        
-//        System.out.println("Latitude: " + localAtual.getLatitude());
-//        System.out.println("Longitude: " + localAtual.getLongitude());
-//        System.out.println(localAtual.getLatitude() + " " + localAtual.getLongitude());
-
-    }
-    
-    
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /*
-         * Set the Nimbus look and feel
-         */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel. For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MGMPMain.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MGMPMain.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MGMPMain.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MGMPMain.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /*
-         * Create and display the dialog
-         */
-
-        MGMPMain dialog = new MGMPMain(new javax.swing.JFrame(), true);
-        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
 
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 System.exit(0);
             }
         });
-        dialog.setVisible(true);
-        
+        btnRegistrar.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                verificarUsuario();
+            }
+        });
+        this.setVisible(true);
+    }
+    
+    private void verificarUsuario() {
+        System.out.println("Email cadastrado: " + ServidorWeb.verificarEmail(txtConta.getText()));
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRegistrar;
