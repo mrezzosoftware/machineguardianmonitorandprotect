@@ -19,7 +19,7 @@ public class ServidorWeb {
             String parametrosRequisicao = "consultarEmail=" + URLEncoder.encode(email, "UTF-8");
             url = new URL(URL_SERVIDOR);
             
-            connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) url.openConnection(NetworkUtil.getLocalProxy());
             connection.setDoInput(true);
             connection.setDoOutput(true);
             connection.setUseCaches(false);
@@ -41,7 +41,6 @@ public class ServidorWeb {
             if (connection.getResponseCode() == 200 && (resposta = leitorResposta.readLine()) != null) {
                 leitorResposta.close();
 
-                System.out.println("Resposta: " + resposta);
                 if (resposta.contains("true")) {
                     
                     return "true";
