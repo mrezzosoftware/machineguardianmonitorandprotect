@@ -1,5 +1,7 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect;
 
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.Constantes;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.PreferencesUtil;
 import br.com.mrezzosoftware.machineguardianmonitorprotect.core.ServidorWeb;
 import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.MGMPWindows;
 import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.monitor.Geolocation;
@@ -17,8 +19,8 @@ public class MGMPMain extends javax.swing.JDialog {
     /**
      * Creates new form MGMPMain
      */
-    public MGMPMain(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public MGMPMain() {
+        super();
         windows = new MGMPWindows();
         initComponents();
         configuracoes();
@@ -93,7 +95,9 @@ public class MGMPMain extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void configuracoes() {
-        System.out.println("Titulo: " + windows.Processos.getNomeProcessoJanelaAtiva());
+        
+        this.setLocationRelativeTo(null);
+        this.setResizable(false);
         
         this.addWindowListener(new java.awt.event.WindowAdapter() {
 
@@ -102,18 +106,40 @@ public class MGMPMain extends javax.swing.JDialog {
                 System.exit(0);
             }
         });
+        
         btnRegistrar.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
-                verificarUsuario();
+                verificarEmail(txtConta.getText());
             }
         });
         this.setVisible(true);
     }
     
-    private void verificarUsuario() {
-        System.out.println("Email cadastrado: " + ServidorWeb.verificarEmail(txtConta.getText()));
+    private void verificarEmail(String emailInformado) {
+        
+        String retornoServidor = ServidorWeb.verificarEmail(emailInformado);
+        
+        if (retornoServidor.equalsIgnoreCase("true")) {
+            
+            registrarEmailMonitor(emailInformado);
+            
+        } else {
+           javax.swing.JOptionPane.showMessageDialog(this,
+                   "E-mail não registrado no servidor.\n",
+                   "Retorno do servidor",
+                   javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        }
     }
+    
+    private void registrarEmailMonitor(String email) {
+        
+        PreferencesUtil.getInstance().registrarValor(Constantes.PREF_EMAIL, email);
+        
+    }
+            
+            
+            
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRegistrar;
     private javax.swing.JPanel jPanel1;
