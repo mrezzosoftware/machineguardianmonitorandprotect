@@ -1,10 +1,8 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect;
 
-import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.MGMPWindows;
 import org.sf.feeling.swt.win32.extension.registry.RegistryKey;
 import org.sf.feeling.swt.win32.extension.registry.RegistryValue;
 import org.sf.feeling.swt.win32.extension.registry.RootKey;
-import org.sf.feeling.swt.win32.extension.registry.ValueType;
 
 public class MachineGuardianMonitorProtect {
 
