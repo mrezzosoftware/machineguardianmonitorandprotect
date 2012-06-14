@@ -16,7 +16,7 @@ public class MachineGuardianMonitorProtect {
             new MGMPMain();
         } else {
             MGMPMain mgmp = new MGMPMain();
-            mgmp.setVisible(false);
+            //mgmp.setVisible(false);
         }
         
         
