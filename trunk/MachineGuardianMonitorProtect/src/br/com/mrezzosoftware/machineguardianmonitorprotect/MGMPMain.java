@@ -98,6 +98,9 @@ public class MGMPMain extends javax.swing.JDialog {
         
         this.setLocationRelativeTo(null);
         this.setResizable(false);
+        this.setVisible(true);
+        this.setUndecorated(true);
+        this.getContentPane().add(this.getContentPane());
         
         this.addWindowListener(new java.awt.event.WindowAdapter() {
 
@@ -113,7 +116,6 @@ public class MGMPMain extends javax.swing.JDialog {
                 verificarEmail(txtConta.getText());
             }
         });
-        this.setVisible(true);
     }
     
     private void verificarEmail(String emailInformado) {
