@@ -9,9 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import javax.swing.JFrame;
-import org.eclipse.swt.internal.win32.SHELLEXECUTEINFO;
 import org.eclipse.swt.widgets.Shell;
-import org.netbeans.lib.awtextra.AbsoluteLayout;
 import org.sf.feeling.swt.win32.extension.shell.ApplicationBar;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 
