@@ -27,4 +27,8 @@ public class PreferencesUtil {
         String v = prefs.get(chave, "NREG");
         return v;
     }
+    
+    public void apagarValor(String chave) {
+        prefs.remove(chave);
+    }
 }
