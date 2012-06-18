@@ -4,8 +4,9 @@
  */
 package br.com.mrezzosoftware.machineguardianmonitorprotect;
 
-import java.net.URL;
-import javax.swing.ImageIcon;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JLabel;
 
 /**
  *
@@ -28,9 +29,14 @@ public class MGMPMainPanel extends javax.swing.JPanel {
      */
     
     public void configurarComponentes() {
-        lblFechar.setIcon(new ImageIcon(MGMPMainPanel.class.getResource("./imagens/fechar.gif")));
+        //lblFechar.setIcon(new ImageIcon(MGMPMainPanel.class.getResource("./imagens/fechar.gif")));
+        lblFechar.addMouseListener(new MouseAdapter() {
+
+            public void mousePressed(MouseEvent e) {
+                javax.swing.SwingUtilities.getWindowAncestor(MGMPMainPanel.this).dispose();
+            }
+        });
     }
-    
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -46,6 +52,12 @@ public class MGMPMainPanel extends javax.swing.JPanel {
 
         btnRegistrar.setText("Registrar");
 
+        lblFechar.setBackground(new java.awt.Color(0, 0, 0));
+        lblFechar.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        lblFechar.setForeground(new java.awt.Color(255, 0, 0));
+        lblFechar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblFechar.setText("X");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -54,12 +66,11 @@ public class MGMPMainPanel extends javax.swing.JPanel {
                 .addGap(10, 10, 10)
                 .addComponent(lblEmail)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(lblFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(lblFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 11, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(txtConta, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 56, Short.MAX_VALUE))
+                .addGap(0, 11, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnRegistrar)
@@ -68,14 +79,15 @@ public class MGMPMainPanel extends javax.swing.JPanel {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblEmail))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtConta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnRegistrar)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(lblEmail)
+                        .addGap(9, 9, 9)
+                        .addComponent(txtConta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnRegistrar))
+                    .addComponent(lblFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents

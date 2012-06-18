@@ -8,10 +8,10 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
-import org.eclipse.swt.widgets.Shell;
-import org.sf.feeling.swt.win32.extension.shell.ApplicationBar;
-import org.sf.feeling.swt.win32.extension.shell.Windows;
+import javax.swing.UnsupportedLookAndFeelException;
 
 public class MGMPRegistrarEmail extends JFrame {
 
@@ -21,24 +21,48 @@ public class MGMPRegistrarEmail extends JFrame {
 
     public MGMPRegistrarEmail() {
 
+        definirAparencia();
         configurarComponentes();
         registrarListeners();
 
         
     }
+    
+    private void definirAparencia() {
+        try {
+            
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+            
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(MGMPRegistrarEmail.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(MGMPRegistrarEmail.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(MGMPRegistrarEmail.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(MGMPRegistrarEmail.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
 
     private void configurarComponentes() {
         panel = new MGMPMainPanel();
+        getContentPane().add(panel);
         setLocationRelativeTo(null);
         setUndecorated(true);
-        ApplicationBar.setAppBarState(new Shell().handle, ApplicationBar.STATE_AUTOHIDE);
-        getContentPane().add(panel);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
         setVisible(true);
-        Windows.hideTitleBar(Windows.getForegroundWindow());
     }
     
     private void registrarListeners() {
+        
+//        panel.getLblFechar().addMouseListener(new MouseAdapter() {
+//
+//            public void mousePressed(MouseEvent e) {
+//                MGMPRegistrarEmail.this.dispose();
+//            }
+//        });
 
         this.addMouseListener(new MouseAdapter() {
 
