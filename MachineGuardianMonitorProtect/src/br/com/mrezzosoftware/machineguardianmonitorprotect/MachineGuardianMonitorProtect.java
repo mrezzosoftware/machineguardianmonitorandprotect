@@ -12,10 +12,10 @@ public class MachineGuardianMonitorProtect {
         
         registrarInicioWindows();
         
-        if (PreferencesUtil.getInstance().obterValor(Constantes.PREF_EMAIL).equalsIgnoreCase("NREG")) {
-            new MGMPMain();
+        if (PreferencesUtil.getInstance().obterValor(Constantes.PREF_ID_MAQUINA).equalsIgnoreCase("NREG")) {
+            new MGMPRegistrarMaquina();
         } else {
-            MGMPMain mgmp = new MGMPMain();
+            //MGMPMain mgmp = new MGMPMain();
             //mgmp.setVisible(false);
         }
         
