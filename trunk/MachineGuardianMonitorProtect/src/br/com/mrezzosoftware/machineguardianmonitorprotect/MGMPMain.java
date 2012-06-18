@@ -7,6 +7,9 @@ import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.MGMPWindows;
 import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.monitor.Geolocation;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
@@ -21,9 +24,27 @@ public class MGMPMain extends javax.swing.JDialog {
      */
     public MGMPMain() {
         super();
+        definirAparencia();
         windows = new MGMPWindows();
         initComponents();
         configuracoes();
+    }
+    
+        private void definirAparencia() {
+        try {
+            
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+            
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(MGMPRegistrarEmail.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(MGMPRegistrarEmail.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(MGMPRegistrarEmail.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(MGMPRegistrarEmail.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
     /**
@@ -38,45 +59,32 @@ public class MGMPMain extends javax.swing.JDialog {
         lblEmail = new javax.swing.JLabel();
         txtConta = new javax.swing.JTextField();
         btnRegistrar = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        lblEmail.setText("Conta Gmail");
+        lblEmail.setText("E-mail cadastrado:");
 
-        btnRegistrar.setText("Registrar");
-
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        btnRegistrar.setText("Verificar");
 
         lblStatus.setText("Pronto");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(lblStatus)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblStatus)
-        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnRegistrar)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(lblEmail)
-                        .addComponent(txtConta, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblEmail)
+                            .addComponent(txtConta, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(lblStatus)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnRegistrar)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -87,8 +95,8 @@ public class MGMPMain extends javax.swing.JDialog {
                 .addComponent(txtConta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnRegistrar)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(10, 10, 10)
+                .addComponent(lblStatus))
         );
 
         pack();
@@ -99,8 +107,6 @@ public class MGMPMain extends javax.swing.JDialog {
         this.setLocationRelativeTo(null);
         this.setResizable(false);
         this.setVisible(true);
-        this.setUndecorated(true);
-        this.getContentPane().add(this.getContentPane());
         
         this.addWindowListener(new java.awt.event.WindowAdapter() {
 
@@ -128,7 +134,8 @@ public class MGMPMain extends javax.swing.JDialog {
             
         } else {
            javax.swing.JOptionPane.showMessageDialog(this,
-                   "E-mail não registrado no servidor.\n",
+                   "E-mail não cadastrado.\nPara utilizar o programa você deve cadastrar"
+                   + " uma conta com e-mail no aplicativo do celular",
                    "Retorno do servidor",
                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
         }
@@ -144,7 +151,6 @@ public class MGMPMain extends javax.swing.JDialog {
             
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRegistrar;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblEmail;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTextField txtConta;
