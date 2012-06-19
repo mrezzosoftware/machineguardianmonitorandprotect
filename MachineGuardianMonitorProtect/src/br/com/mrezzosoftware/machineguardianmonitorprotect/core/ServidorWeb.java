@@ -19,7 +19,6 @@ public class ServidorWeb {
             //Create connection
             String parametrosRequisicao = "email=" + URLEncoder.encode(email, "UTF-8");
             parametrosRequisicao += "&verificarEmail=" + URLEncoder.encode("true", "UTF-8");
-            System.out.println("Parametros: " + parametrosRequisicao);
             url = new URL(URL_SERVIDOR);
             
             connection = (HttpURLConnection) url.openConnection(NetworkUtil.getLocalProxy());
@@ -40,8 +39,6 @@ public class ServidorWeb {
             String resposta;
             InputStream is = connection.getInputStream();
             BufferedReader leitorResposta = new BufferedReader(new InputStreamReader(is));
-
-            System.out.println("RESPOSTA: " + (resposta = leitorResposta.readLine()));
             
             if (connection.getResponseCode() == 200 && (resposta = leitorResposta.readLine()) != null) {
                 leitorResposta.close();
@@ -71,6 +68,7 @@ public class ServidorWeb {
             }
         }
     }
+    
     public static String cadastrarMaquina(String idMaquina) {
 
         URL url;
@@ -79,8 +77,8 @@ public class ServidorWeb {
         try {
             //Create connection
             String parametrosRequisicao = "email=" + URLEncoder.encode(PreferencesUtil.getInstance().obterValor(Constantes.PREF_EMAIL), "UTF-8");
-            parametrosRequisicao += "idMaquina=" + URLEncoder.encode(idMaquina, "UTF-8");
-            parametrosRequisicao += "cadastrarMaquina=" + URLEncoder.encode("true", "UTF-8");
+            parametrosRequisicao += "&idMaquina=" + URLEncoder.encode(idMaquina, "UTF-8");
+            parametrosRequisicao += "&cadastrarMaquina=" + URLEncoder.encode("true", "UTF-8");
             url = new URL(URL_SERVIDOR);
             
             connection = (HttpURLConnection) url.openConnection(NetworkUtil.getLocalProxy());
@@ -102,9 +100,11 @@ public class ServidorWeb {
             InputStream is = connection.getInputStream();
             BufferedReader leitorResposta = new BufferedReader(new InputStreamReader(is));
 
+            //System.out.println("(resposta = leitorResposta.readLine()): " + (resposta = leitorResposta.readLine()));
+            
             if (connection.getResponseCode() == 200 && (resposta = leitorResposta.readLine()) != null) {
                 leitorResposta.close();
-
+                
                 if (resposta.contains("true")) {
                     
                     return "true";
@@ -112,6 +112,10 @@ public class ServidorWeb {
                 } else if (resposta.contains("false")) {
                     
                     return "false";
+                    
+                } else if (resposta.contains("existente")) {
+                    
+                    return "existente";
                     
                 } else {
                     return connection.getResponseCode() + " - " + connection.getResponseMessage();
@@ -124,7 +128,86 @@ public class ServidorWeb {
         } catch (Exception e) {
             return "ERRO";
         } finally {
+            
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+    
+    public static Operacoes obterOperacoes() {
 
+        URL url;
+        HttpURLConnection connection = null;
+
+        try {
+            //Create connection
+            String parametrosRequisicao = "email=" + URLEncoder.encode(PreferencesUtil.getInstance().obterValor(Constantes.PREF_EMAIL), "UTF-8");
+            parametrosRequisicao += "&idMaquina=" + URLEncoder.encode(PreferencesUtil.getInstance().obterValor(Constantes.PREF_ID_MAQUINA), "UTF-8");
+            parametrosRequisicao += "&listarOperacoes=" + URLEncoder.encode("true", "UTF-8");
+            
+            url = new URL(URL_SERVIDOR);
+            
+            connection = (HttpURLConnection) url.openConnection(NetworkUtil.getLocalProxy());
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setUseCaches(false);
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            connection.setRequestProperty("Content-Length", "" + Integer.toString(parametrosRequisicao.getBytes().length));
+
+
+            //Send request
+            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+            wr.writeBytes(parametrosRequisicao);
+            wr.flush();
+            wr.close();
+
+            String resposta;
+            InputStream is = connection.getInputStream();
+            BufferedReader leitorResposta = new BufferedReader(new InputStreamReader(is));
+
+            //System.out.println("(resposta = leitorResposta.readLine()): " + (resposta = leitorResposta.readLine()));
+            
+            if (connection.getResponseCode() == 200 && (resposta = leitorResposta.readLine()) != null) {
+                leitorResposta.close();
+                Operacoes operacoes;
+                
+                if (resposta.contains(":")) {
+                    
+                    String[] arrayStringOper = resposta.trim().split(":");
+                    
+                    operacoes = new Operacoes();
+                    operacoes.setModoEspera((arrayStringOper[0].equalsIgnoreCase("1")) ? true : false);
+                    operacoes.setTempoAtualizacao(Byte.parseByte(arrayStringOper[1]));
+                    operacoes.setIdOperacao(Byte.parseByte(arrayStringOper[2]));
+                    operacoes.setCapturarTeclas((arrayStringOper[3].equalsIgnoreCase("1")) ? true : false);
+                    operacoes.setGeolocalizacao((arrayStringOper[4].equalsIgnoreCase("1")) ? true : false);
+                    
+                    
+                    
+                    return operacoes;
+                    
+                } else if (resposta.contains("inexistente")) {
+                    
+                    return null;
+                    
+                } else if (resposta.contains("existente")) {
+                    
+                    return null;
+                    
+                } else {
+                    return null;
+                }
+                
+            } else {
+                return null;
+            }
+
+        } catch (Exception e) {
+            return null;
+        } finally {
+            
             if (connection != null) {
                 connection.disconnect();
             }
