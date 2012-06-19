@@ -14,7 +14,7 @@ import javax.swing.UnsupportedLookAndFeelException;
  * @author MRezzoSoftware
  */
 public class MGMPRegistrarMaquina extends javax.swing.JDialog {
-
+    
     /**
      * Creates new form MGMPMain
      */
@@ -138,12 +138,14 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
         this.setResizable(false);
         this.setVisible(true);
         verificarExistenciaRegistroEmailMonitor();
+        PreferencesUtil.getInstance().registrarValor(Constantes.PREF_TEMPO_ATUALIZACAO, "1");
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
 
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 System.exit(0);
+                MachineGuardianMonitorProtect.executar = true;
             }
         });
 
@@ -175,6 +177,7 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
     private void verificarEmail(String emailInformado) {
 
         String retornoServidor = ServidorWeb.verificarEmail(emailInformado);
+        System.out.println("retornoServidor: " + retornoServidor);
 
         if (retornoServidor.equalsIgnoreCase("true")) {
 
@@ -205,11 +208,20 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
                     + "Utilize o programa no celular para realizar as ações desejadas.",
                     "Retorno do servidor",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
-
+            
+            MachineGuardianMonitorProtect.executar = true;
+            this.dispose();
+            
+        } else if (retornoServidor.equalsIgnoreCase("existente")) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Máquina já cadastrada.\n"
+                    + "Já existe uma máquina com este mesmo id no servidor.",
+                    "Retorno do servidor",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
         } else {
             javax.swing.JOptionPane.showMessageDialog(this,
-                    "Máquina não cadastrada.\n"
-                    + "Não foi possível cadastrar a máquina no servidor.",
+                    "Erro ao cadastrar máquina.\n"
+                    + "Ocorreu um erro ao cadastrar a máquina. Tente mais tarde.",
                     "Retorno do servidor",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
         }

@@ -109,8 +109,8 @@ public class MGMPWindows {
 
         }
 
-        public void desligarComputador(boolean forcarReinicializacao) {
-            user32.ExitWindowsEx(SHUTDOWN, ((forcarReinicializacao) ? FORCE : 0));
+        public void desligarComputador(boolean forcarDesligamento) {
+            user32.ExitWindowsEx(SHUTDOWN, ((forcarDesligamento) ? FORCE : 0));
         }
         
     }
