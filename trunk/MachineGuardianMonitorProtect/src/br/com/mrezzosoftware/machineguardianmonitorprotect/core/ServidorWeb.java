@@ -1,9 +1,12 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect.core;
 
+import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.monitor.Geolocation;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ServidorWeb {
 
@@ -99,8 +102,6 @@ public class ServidorWeb {
             String resposta;
             InputStream is = connection.getInputStream();
             BufferedReader leitorResposta = new BufferedReader(new InputStreamReader(is));
-
-            //System.out.println("(resposta = leitorResposta.readLine()): " + (resposta = leitorResposta.readLine()));
             
             if (connection.getResponseCode() == 200 && (resposta = leitorResposta.readLine()) != null) {
                 leitorResposta.close();
@@ -166,8 +167,6 @@ public class ServidorWeb {
             String resposta;
             InputStream is = connection.getInputStream();
             BufferedReader leitorResposta = new BufferedReader(new InputStreamReader(is));
-
-            //System.out.println("(resposta = leitorResposta.readLine()): " + (resposta = leitorResposta.readLine()));
             
             if (connection.getResponseCode() == 200 && (resposta = leitorResposta.readLine()) != null) {
                 leitorResposta.close();
@@ -175,6 +174,7 @@ public class ServidorWeb {
                 
                 if (resposta.contains(":")) {
                     
+                    System.out.println("OPERAÇÕES: " + resposta);
                     String[] arrayStringOper = resposta.trim().split(":");
                     
                     operacoes = new Operacoes();
@@ -205,7 +205,75 @@ public class ServidorWeb {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
+        } finally {
+            
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+    
+    public static String registrarLocalizacaoMaquina(Geolocation.Coordenadas coords) {
+
+        URL url;
+        HttpURLConnection connection = null;
+
+        try {
+            //Create connection
+            String parametrosRequisicao = "email=" + URLEncoder.encode(PreferencesUtil.getInstance().obterValor(Constantes.PREF_EMAIL), "UTF-8");
+            parametrosRequisicao += "&idMaquina=" + URLEncoder.encode(PreferencesUtil.getInstance().obterValor(Constantes.PREF_ID_MAQUINA), "UTF-8");
+            parametrosRequisicao += "&inserirLocalizacao=" + URLEncoder.encode("true", "UTF-8");
+            parametrosRequisicao += "&latitude=" + URLEncoder.encode(coords.getLatitude(), "UTF-8");
+            parametrosRequisicao += "&longitude=" + URLEncoder.encode(coords.getLongitude(), "UTF-8");
+            parametrosRequisicao += "&dataHora=" + URLEncoder.encode(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()), "UTF-8");
+            
+            
+            
+            url = new URL(URL_SERVIDOR);
+            
+            connection = (HttpURLConnection) url.openConnection(NetworkUtil.getLocalProxy());
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setUseCaches(false);
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            connection.setRequestProperty("Content-Length", "" + Integer.toString(parametrosRequisicao.getBytes().length));
+
+
+            //Send request
+            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+            wr.writeBytes(parametrosRequisicao);
+            wr.flush();
+            wr.close();
+
+            String resposta;
+            InputStream is = connection.getInputStream();
+            BufferedReader leitorResposta = new BufferedReader(new InputStreamReader(is));
+            
+            if (connection.getResponseCode() == 200 && (resposta = leitorResposta.readLine()) != null) {
+                leitorResposta.close();
+                
+                if (resposta.contains("true")) {
+                    
+                    return "true";
+                    
+                } else if (resposta.contains("false")) {
+                    
+                    return "false";
+                    
+                } else {
+                    return "false";
+                }
+                
+            } else {
+                return "false";
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "false";
         } finally {
             
             if (connection != null) {

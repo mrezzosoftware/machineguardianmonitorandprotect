@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.mrezzosoftware.machineguardianmonitorprotect.core;
+package br.com.mrezzosoftware.machineguardianmonitorprotect.core.teclado;
 
 import br.com.mrezzosoftware.machineguardianmonitorprotect.windows.MGMPWindows;
 

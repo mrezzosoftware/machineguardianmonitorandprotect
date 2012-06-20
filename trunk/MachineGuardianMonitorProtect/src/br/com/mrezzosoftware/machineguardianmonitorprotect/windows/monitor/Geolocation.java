@@ -126,7 +126,6 @@ public class Geolocation {
             url = codificarUrl(url);
         } catch (exceptions.InternalErrorException e) {
             System.out.println("SEM PLACA WIRELESS");
-            
         }
 
         return url;
