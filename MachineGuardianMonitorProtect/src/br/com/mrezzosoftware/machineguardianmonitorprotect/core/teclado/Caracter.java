@@ -1,4 +1,4 @@
-package br.com.mrezzosoftware.machineguardianmonitorprotect.core;
+package br.com.mrezzosoftware.machineguardianmonitorprotect.core.teclado;
 
 import org.sf.feeling.swt.win32.extension.Win32;
 import org.sf.feeling.swt.win32.internal.extension.Extension;

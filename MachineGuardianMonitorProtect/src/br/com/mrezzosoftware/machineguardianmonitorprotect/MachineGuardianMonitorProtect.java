@@ -38,15 +38,6 @@ public class MachineGuardianMonitorProtect {
             iniciarExecucao();
 
         }
-
-
-
-
-//        MGMPWindows w = new MGMPWindows();
-//        System.out.println("Título janela ativa: " + w.Processos.getTituloJanelaAtiva());
-//        System.out.println("Nome executável da janela: " + w.Processos.getNomeProcessoJanelaAtiva());
-        //w.Teclado.iniciarCapturaTeclasDigitadas();
-        //w.SO.fazerLogoff(true);
     }
 
     private static boolean registrarInicioWindows() {

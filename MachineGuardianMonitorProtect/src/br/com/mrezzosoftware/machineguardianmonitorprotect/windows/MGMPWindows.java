@@ -1,7 +1,6 @@
 package br.com.mrezzosoftware.machineguardianmonitorprotect.windows;
 
-import br.com.mrezzosoftware.machineguardianmonitorprotect.core.*;
-import com.sun.jna.Native;
+import br.com.mrezzosoftware.machineguardianmonitorprotect.core.teclado.Caracter;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.util.logging.Level;
@@ -13,17 +12,14 @@ import org.sf.feeling.swt.win32.extension.hook.listener.HookEventListener;
 import org.sf.feeling.swt.win32.extension.shell.Windows;
 import org.sf.feeling.swt.win32.extension.system.Kernel;
 import org.sf.feeling.swt.win32.extension.system.ProcessEntry;
+import org.sf.feeling.swt.win32.extension.system.WindowsSession;
 
 /**
  *
  * @author MRezzo Software
  */
 public class MGMPWindows {
-
-    private MyUser32 user32 = (MyUser32) Native.loadLibrary("user32", MyUser32.class);
-    private MyKernel32 kernel32 = (MyKernel32) Native.loadLibrary("kernel32", MyKernel32.class);
-    private MyPsapi psapi = (MyPsapi) Native.loadLibrary("psapi", MyPsapi.class);
-    private MyPowrProf powrProf = (MyPowrProf) Native.loadLibrary("powrprof", MyPowrProf.class);
+    
     public final Processos Processos;
     public final Teclado Teclado;
     public final SO SO;
@@ -67,9 +63,6 @@ public class MGMPWindows {
          * @return String título da janela ativa
          */
         public String getTituloJanelaAtiva() {
-//            byte[] windowText = new byte[512];
-//            user32.GetWindowTextA(user32.GetForegroundWindow(), windowText, user32.GetWindowTextLengthA(user32.GetForegroundWindow()) + 1);
-//            return Native.toString(windowText);
             String titulo = "";
 
             titulo = Windows.getWindowText(Windows.getForegroundWindow());
@@ -78,39 +71,30 @@ public class MGMPWindows {
         }
     }
 
-    public class SO {
+    public class SO {        
+        
 
-        private final int LOGOFF = 0;
-        private final int POWEROFF = 0x00000008;
-        private final int REBOOT = 0x00000002;
-        private final int RESTARTAPPS = 0x00000040;
-        private final int SHUTDOWN = 0x00000001;
-        private final int FORCE = 0x00000004;
-        private final int FORCEIFHUNG = 0x00000010;
-
-        private SO() {
-        }
+        private SO() {}
 
         public void bloquearEstacaoTrabalho() {
-            user32.LockWorkStation();
+            WindowsSession.LockWorkstation();
         }
 
-        public void fazerLogoff(boolean forcarLogoff) {
-            user32.ExitWindowsEx(LOGOFF, ((forcarLogoff) ? FORCE : 0));
+        public void fazerLogoff(boolean notificar) {
+            WindowsSession.Logoff(notificar);
         }
         
-        public void hibernarComputador() {
-            powrProf.SetSuspendState(true, false, true);
+        public void hibernarComputador(boolean notificar) {
+            WindowsSession.HibernateWorkstation(notificar);
         }
 
-        public void reiniciarComputador(boolean forcarReinicializacao) {
-
-            user32.ExitWindowsEx(REBOOT, ((forcarReinicializacao) ? FORCE : 0));
+        public void reiniciarComputador(boolean notificar) {
+            WindowsSession.Reboot(notificar);
 
         }
 
-        public void desligarComputador(boolean forcarDesligamento) {
-            user32.ExitWindowsEx(SHUTDOWN, ((forcarDesligamento) ? FORCE : 0));
+        public void desligarComputador(boolean notificar) {
+            WindowsSession.Shutdown(notificar);
         }
         
     }
@@ -136,6 +120,8 @@ public class MGMPWindows {
         private Caracter caracter = new Caracter();
         private String caracterEspecial = "";
         private StringBuilder palavra = new StringBuilder();
+        
+        public boolean capturandoTeclas;
 
         private Teclado() {
             criarObjetos();
@@ -228,7 +214,9 @@ public class MGMPWindows {
                                     posicaoCarroEscritaPalavra = palavra.length();
                                     
                                 } else if (caracterEspecial.equalsIgnoreCase("[BACKSPACE]")) {
-                                    palavra.deleteCharAt(posicaoCarroEscritaPalavra-1);
+                                    if (posicaoCarroEscritaPalavra > 0) {
+                                        palavra.deleteCharAt(--posicaoCarroEscritaPalavra);
+                                    }
                                 }
 
                                 caracterEspecial = "";
@@ -291,7 +279,7 @@ public class MGMPWindows {
         public void iniciarCapturaTeclasDigitadas() {
             Hook.KEYBOARD.addListener(MGMPWindows.this, hookEventListener);
             Hook.KEYBOARD.install(MGMPWindows.this);
-            rodando = true;
+            capturandoTeclas = (rodando = true);
 
             new Thread(new Runnable() {
 
@@ -319,7 +307,7 @@ public class MGMPWindows {
         }
 
         public void pararCapturaTeclasDigitadas() {
-            rodando = false;
+            capturandoTeclas = (rodando = false);
         }
 
         private void imprimeChar(char s) {

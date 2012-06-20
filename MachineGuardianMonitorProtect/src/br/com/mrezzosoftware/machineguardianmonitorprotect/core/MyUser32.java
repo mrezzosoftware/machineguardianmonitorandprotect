@@ -35,7 +35,7 @@ public interface MyUser32 extends Library {
     boolean TranslateMessage(WinUser.MSG msg);
     LRESULT DispatchMessage(WinUser.MSG msg);
     
-    boolean ExitWindowsEx(int flags, int reason);
+    boolean ExitWindowsEx(long flags, long reason);
     boolean LockWorkStation();
     
 }

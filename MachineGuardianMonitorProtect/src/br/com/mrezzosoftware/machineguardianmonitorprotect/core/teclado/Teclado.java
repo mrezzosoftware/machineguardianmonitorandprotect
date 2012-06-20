@@ -1,4 +1,4 @@
-package br.com.mrezzosoftware.machineguardianmonitorprotect.core;
+package br.com.mrezzosoftware.machineguardianmonitorprotect.core.teclado;
 
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
