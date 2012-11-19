@@ -10,8 +10,7 @@ import java.util.Date;
 
 public class ServidorWeb {
 
-    //private static final String URL_SERVIDOR = "http://www.mrsoftware.qlix.com.br";
-    private static final String URL_SERVIDOR = "http://mrs.ueuo.com/";
+    private static final String URL_SERVIDOR = "http://www.mrsoftware.qlix.com.br";
 
     public static String verificarEmail(String email) {
 
