@@ -4,6 +4,8 @@
  */
 package br.com.mrezzosoftware.machineguardianmonitorprotect.core;
 
+import java.util.Date;
+
 /**
  *
  * @author 01837484333
@@ -11,8 +13,9 @@ package br.com.mrezzosoftware.machineguardianmonitorprotect.core;
 public class Operacoes {
 
     private boolean modoEspera = false;
-    private byte tempoAtualizacao = 1;
-    private byte idOperacao = 0;
+    private int tempoAtualizacao = 5000;
+    private Date ultimaAtualizacaoMobile;
+    private byte idAcao = 0;
     private boolean capturarTeclas = false;
     private boolean geolocalizacao = false;
 
@@ -33,29 +36,43 @@ public class Operacoes {
     /**
      * @return the tempoAtualizacao
      */
-    public byte getTempoAtualizacao() {
+    public int getTempoAtualizacao() {
         return tempoAtualizacao;
     }
 
     /**
      * @param tempoAtualizacao the tempoAtualizacao to set
      */
-    public void setTempoAtualizacao(byte tempoAtualizacao) {
+    public void setTempoAtualizacao(int tempoAtualizacao) {
         this.tempoAtualizacao = tempoAtualizacao;
+    }
+
+    /**
+     * @return the ultimaAtualizacao
+     */
+    public Date getUltimaAtualizacaoMobile() {
+        return ultimaAtualizacaoMobile;
+    }
+
+    /**
+     * @param ultimaAtualizacao the ultimaAtualizacao to set
+     */
+    public void setUltimaAtualizacaoMobile(Date ultimaAtualizacaoMobile) {
+        this.ultimaAtualizacaoMobile = ultimaAtualizacaoMobile;
     }
 
     /**
      * @return the idOperacao
      */
-    public byte getIdOperacao() {
-        return idOperacao;
+    public byte getIdAcao() {
+        return idAcao;
     }
 
     /**
      * @param idOperacao the idOperacao to set
      */
-    public void setIdOperacao(byte idOperacao) {
-        this.idOperacao = idOperacao;
+    public void setIdAcao(byte idAcao) {
+        this.idAcao = idAcao;
     }
 
     /**

@@ -25,7 +25,7 @@ public class MGMPAgent implements Runnable {
     private Operacoes operacoesAtuais;
 
     public MGMPAgent() {
-        this.operacoesAtuais = new Operacoes();
+        //this.operacoesAtuais = new Operacoes();
     }
 
     public void run() {
@@ -37,22 +37,32 @@ public class MGMPAgent implements Runnable {
         while (true) {
 
             try {
-                Thread.sleep(operacoesAtuais.getTempoAtualizacao() * 10000);
+                Thread.sleep(operacoesAtuais == null ? 10000 : operacoesAtuais.getTempoAtualizacao());
             } catch (InterruptedException ex) {
                 Logger.getLogger(MGMPAgent.class.getName() + " - Erro Thread").log(Level.SEVERE, null, ex);
             }
 
             operacoesNovas = ServidorWeb.obterOperacoes();
 
+
             if (operacoesNovas != null) {
 
-                operacoesAtuais = operacoesNovas;
+                if (operacoesAtuais == null) {
+                    operacoesAtuais = operacoesNovas;
+                } else if (operacoesNovas.getUltimaAtualizacaoMobile().getTime() > operacoesAtuais.getUltimaAtualizacaoMobile().getTime()) {
+                    operacoesAtuais = operacoesNovas;
+                } else {
+                    System.out.println("RETORNANDO AO INÍCIO DO WHILE");
+                    continue;
+                }
+
+                System.out.println("PASSEI O WHILE");
 
                 if (!operacoesAtuais.irParaModoEspera()) {
 
                     System.out.println("EXECUTANDO");
 
-                    if (!(operacoesAtuais.getTempoAtualizacao() == Byte.valueOf(PreferencesUtil.getInstance().obterValor(Constantes.PREF_TEMPO_ATUALIZACAO)))) {
+                    if (!(operacoesAtuais.getTempoAtualizacao() == Integer.valueOf(PreferencesUtil.getInstance().obterValor(Constantes.PREF_TEMPO_ATUALIZACAO)))) {
                         PreferencesUtil.getInstance().registrarValor(Constantes.PREF_TEMPO_ATUALIZACAO, String.valueOf(operacoesAtuais.getTempoAtualizacao()));
                     }
 
@@ -65,36 +75,36 @@ public class MGMPAgent implements Runnable {
                     if (operacoesAtuais.isToGeolocalizacao()) {
                         Geolocation.Coordenadas coords = geolocalizacao.localizarUsuario();
                         if (coords != null) {
-                            
+
                             String retornoServidor = ServidorWeb.registrarLocalizacaoMaquina(coords);
-                            
+
                             if (retornoServidor.equalsIgnoreCase("true")) {
                                 System.out.println("LOCALIZAÇÃO INSERIDA");
                             } else {
                                 System.out.println("ERRO AO INSERIR LOCALIZAÇÃO");
                             }
-                            
+
                         }
                     }
 
-                    switch (operacoesAtuais.getIdOperacao()) {
-                        case Constantes.OP_BLOQUEAR: {
+                    switch (operacoesAtuais.getIdAcao()) {
+                        case Constantes.AC_BLOQUEAR: {
                             windows.SO.bloquearEstacaoTrabalho();
                             break;
                         }
-                        case Constantes.OP_LOGOFF: {
+                        case Constantes.AC_LOGOFF: {
                             windows.SO.fazerLogoff(true);
                             break;
                         }
-                        case Constantes.OP_HIBERNAR: {
+                        case Constantes.AC_HIBERNAR: {
                             windows.SO.hibernarComputador(true);
                             break;
                         }
-                        case Constantes.OP_REINICIAR: {
+                        case Constantes.AC_REINICIAR: {
                             windows.SO.reiniciarComputador(true);
                             break;
                         }
-                        case Constantes.OP_DESLIGAR: {
+                        case Constantes.AC_DESLIGAR: {
                             WindowsSession.Shutdown(true);
                             break;
                         }

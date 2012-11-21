@@ -9,9 +9,9 @@ public class Constantes {
     public static final String PREF_TEMPO_ATUALIZACAO = "tempoAtualizacao";
     
     
-    public static final int OP_BLOQUEAR = 1;
-    public static final int OP_LOGOFF = 2;
-    public static final int OP_HIBERNAR = 3;
-    public static final int OP_REINICIAR = 4;
-    public static final int OP_DESLIGAR = 5;
+    public static final byte AC_BLOQUEAR = 1;
+    public static final byte AC_LOGOFF = 2;
+    public static final byte AC_HIBERNAR = 3;
+    public static final byte AC_REINICIAR = 4;
+    public static final byte AC_DESLIGAR = 5;
 }

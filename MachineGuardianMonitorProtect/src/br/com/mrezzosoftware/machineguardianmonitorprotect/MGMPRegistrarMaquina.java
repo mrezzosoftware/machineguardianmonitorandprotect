@@ -52,7 +52,6 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
 
         lblEmailCadastrado = new javax.swing.JLabel();
         txtEmailCadastrado = new javax.swing.JTextField();
-        btnVerificarEmail = new javax.swing.JButton();
         lblEmailCadastradoInfo = new javax.swing.JLabel();
         lblIdMaquina = new javax.swing.JLabel();
         lblIdMaquinaInfo = new javax.swing.JLabel();
@@ -63,8 +62,6 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
         setBackground(new java.awt.Color(236, 233, 216));
 
         lblEmailCadastrado.setText("E-mail cadastrado:");
-
-        btnVerificarEmail.setText("Verificar");
 
         lblEmailCadastradoInfo.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         lblEmailCadastradoInfo.setForeground(new java.awt.Color(255, 0, 0));
@@ -102,9 +99,7 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
                         .addGap(0, 83, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnVerificarEmail, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnRegistrarMaquina, javax.swing.GroupLayout.Alignment.TRAILING))))
+                        .addComponent(btnRegistrarMaquina)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -117,8 +112,6 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtEmailCadastrado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnVerificarEmail)
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblIdMaquina)
                     .addComponent(lblIdMaquinaInfo))
@@ -137,8 +130,8 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
         this.setLocationRelativeTo(null);
         this.setResizable(false);
         this.setVisible(true);
-        verificarExistenciaRegistroEmailMonitor();
-        PreferencesUtil.getInstance().registrarValor(Constantes.PREF_TEMPO_ATUALIZACAO, "1");
+        //PreferencesUtil.getInstance().registrarValor(Constantes.PREF_TEMPO_ATUALIZACAO, "120000");
+        PreferencesUtil.getInstance().registrarValor(Constantes.PREF_TEMPO_ATUALIZACAO, "10000");
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
 
@@ -149,60 +142,39 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
             }
         });
 
-        btnVerificarEmail.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                verificarEmail(txtEmailCadastrado.getText());
-            }
-        });
-
         btnRegistrarMaquina.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
-                registrarIdMaquinaMonitorada(txtIdMaquina.getText());
+                registrarIdMaquinaMonitorada(txtEmailCadastrado.getText(), txtIdMaquina.getText());
             }
         });
     }
 
-    private void verificarExistenciaRegistroEmailMonitor() {
-        String email = PreferencesUtil.getInstance().obterValor(Constantes.PREF_EMAIL);
 
-        if (!email.equalsIgnoreCase("NREG")) {
-            txtEmailCadastrado.setText(email);
-            desabilitarCampo(txtEmailCadastrado);
-            desabilitarCampo(btnVerificarEmail);
-        }
-    }
+    private void registrarIdMaquinaMonitorada(String email, String idMaquina) {
 
-    private void verificarEmail(String emailInformado) {
-
-        String retornoServidor = ServidorWeb.verificarEmail(emailInformado);
-        System.out.println("retornoServidor: " + retornoServidor);
-
-        if (retornoServidor.equalsIgnoreCase("true")) {
-
-            PreferencesUtil.getInstance().registrarValor(Constantes.PREF_EMAIL, emailInformado);
-            desabilitarCampo(txtEmailCadastrado);
-            desabilitarCampo(btnVerificarEmail);
-            habilitarCampo(txtIdMaquina);
-            habilitarCampo(btnRegistrarMaquina);
-
-        } else {
+        String retornoServidor = ServidorWeb.cadastrarMaquina(email, idMaquina);
+        
+        System.out.println("retornoServidor: \"" + retornoServidor + "\""); 
+        
+        if (retornoServidor.equalsIgnoreCase("MAQ-JA-CAD")) {
+            
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Máquina já cadastrada.\n"
+                    + "Já existe uma máquina com este mesmo nome no servidor para o email " + email,
+                    "Retorno do servidor",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        } else if (retornoServidor.equalsIgnoreCase("MAIL-NAO-CAD")) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "E-mail não cadastrado.\n"
+                    + "O e-mail " + email + " não está cadastrado.\n"
                     + "Para utilizar o programa você deve cadastrar uma conta com e-mail no aplicativo do celular.",
                     "Retorno do servidor",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void registrarIdMaquinaMonitorada(String idMaquina) {
-
-        String retornoServidor = ServidorWeb.cadastrarMaquina(idMaquina);
-
-        if (retornoServidor.equalsIgnoreCase("true")) {
+        } else if (retornoServidor.equalsIgnoreCase("CAD-MAQ-SUC")) {
+            PreferencesUtil.getInstance().registrarValor(Constantes.PREF_EMAIL, email);
             PreferencesUtil.getInstance().registrarValor(Constantes.PREF_ID_MAQUINA, idMaquina);
-
+            
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Máquina registrada.\n"
                     + "Utilize o programa no celular para realizar as ações desejadas.",
@@ -211,20 +183,9 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
             
             MachineGuardianMonitorProtect.executar = true;
             this.dispose();
-            
-        } else if (retornoServidor.equalsIgnoreCase("existente")) {
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    "Máquina já cadastrada.\n"
-                    + "Já existe uma máquina com este mesmo id no servidor.",
-                    "Retorno do servidor",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-        } else {
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    "Erro ao cadastrar máquina.\n"
-                    + "Ocorreu um erro ao cadastrar a máquina. Tente mais tarde.",
-                    "Retorno do servidor",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
         }
+        
+
 
     }
 
@@ -237,7 +198,6 @@ public class MGMPRegistrarMaquina extends javax.swing.JDialog {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRegistrarMaquina;
-    private javax.swing.JButton btnVerificarEmail;
     private javax.swing.JLabel lblEmailCadastrado;
     private javax.swing.JLabel lblEmailCadastradoInfo;
     private javax.swing.JLabel lblIdMaquina;
