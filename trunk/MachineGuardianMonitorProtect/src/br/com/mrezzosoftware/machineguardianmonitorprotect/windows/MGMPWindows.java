@@ -172,9 +172,6 @@ public class MGMPWindows {
                                 }
                                 
                                 posicaoCarroEscritaPalavra++;
-                                
-                                System.out.println("posicaoCarroEscritaPalavra: " + posicaoCarroEscritaPalavra);
-                                System.out.println("palavra.length(): " + palavra.length());
 
                             } else if (!caracter.isCaracterEspecial(vkCode).equalsIgnoreCase("")) {
 
